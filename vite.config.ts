@@ -49,10 +49,8 @@ export default defineConfig({
   css: {
     postcss: {
       plugins: [
-        // @ts-expect-error: 本来 `postcss.config.cjs` で設定するものをここで設定している
-        pandacss,
-        // NOTE: PandaCSS で勧められている `autoprefixer`, `@csstools/postcss-cascade-layers` を内包している `postcss-preset-env` を使用
-        // ref: https://github.com/csstools/postcss-plugins/tree/27b9126dc2f049aa20b02f7e3dbbb2c5c6c87f43/plugin-packs/postcss-preset-env
+        // @ts-expect-error: pandacss postcss plugin type incompatibility with exactOptionalPropertyTypes
+        pandacss(),
         // postcssPresetEnv,
       ],
     },

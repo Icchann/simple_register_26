@@ -47,7 +47,9 @@ export function Layout({ children }: { children: ReactNode }): ReactElement {
 
 export default function (): ReactElement {
   useEffect(() => {
-    void getCurrentWindow().setFullscreen(true);
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      void getCurrentWindow().setFullscreen(true);
+    }
   }, []);
 
   return (
