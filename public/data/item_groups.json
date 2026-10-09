@@ -1,21 +1,26 @@
 [
   {
     "id": "bf8hypkw4ahz8t6bv3i0o0ot",
-    "name": "ポップコーン",
+    "name": "だんご",
     "children": [
       {
         "id": "oqlepx24xm8ktgt8nrx9tpje",
-        "name": "塩",
+        "name": "きなこ",
         "price": 150
       },
       {
         "id": "rewzi8gl3niybtniael3uc9r",
-        "name": "カレー",
+        "name": "みたらし",
         "price": 150
       },
       {
         "id": "wfw50wz1z38z3jo0jqci3hfb",
-        "name": "キャラメル",
+        "name": "あんこ",
+        "price": 150
+      },      
+      {
+        "id": "wfw50wz1z38z3jo0jqci3hfb",
+        "name": "のり醤油",
         "price": 150
       }
     ]
@@ -58,11 +63,6 @@
       {
         "id": "p92trulfts7pz8pgiisehpmu",
         "name": "アクエリ",
-        "price": 100
-      },
-      {
-        "id": "uqwhams80qhqk99xdeo9i79n",
-        "name": "MATCH",
         "price": 100
       },
       {
