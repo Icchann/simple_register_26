@@ -165,6 +165,22 @@ function Status(): ReactElement {
               </p.p>
             </>
           ))
+          .with({ type: "EXTRA_PORTION_WITHOUT_ITEM" }, () => (
+            <>
+              <IconMaterialSymbolsError />
+              <p.p>
+                増量を登録するには団子が必要です
+              </p.p>
+            </>
+          ))
+          .with({ type: "EXTRA_PORTION_EXCEEDED" }, () => (
+            <>
+              <IconMaterialSymbolsError />
+              <p.p>
+                増量の数量は団子の数量以下にしてください
+              </p.p>
+            </>
+          ))
           .exhaustive()}
       </HStack>
     ))

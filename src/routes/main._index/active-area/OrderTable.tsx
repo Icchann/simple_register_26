@@ -20,6 +20,7 @@ import {
   findDiscountByNumber,
   findItemByNumber,
   updateOrderRows,
+  validateExtraPortion,
 } from "@/lib/stores/current-order";
 import { $orderPhase } from "@/lib/stores/phase";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -237,6 +238,17 @@ export function OrderTable(): ReactElement {
                   receiptNumber: $currentOrder.get().receiptNumber,
                 },
               );
+              return;
+            }
+
+            // 団子と増量の数量整合性を検証
+            const extraPortionResult = validateExtraPortion();
+            if (extraPortionResult.isErr()) {
+              setStatusWithTimeout({
+                type: "INVALID_VALUE",
+                detail: { type: extraPortionResult.error },
+                receiptNumber: $currentOrder.get().receiptNumber,
+              });
               return;
             }
 

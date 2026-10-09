@@ -38,6 +38,12 @@ export type Status
         type: "DEPOSIT_INSUFFICIENT";
         deposit: number;
         total: number;
+      }
+      | {
+        type: "EXTRA_PORTION_WITHOUT_ITEM";
+      }
+      | {
+        type: "EXTRA_PORTION_EXCEEDED";
       };
   }
   | {

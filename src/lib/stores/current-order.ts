@@ -1,10 +1,13 @@
+import type { Result } from "neverthrow";
 import type { DiscountNumber, Item, ItemNumber } from "@/types/item";
 import type { OrderItemAmount as OrderItemAmountType, ReceiptNumber } from "@/types/order";
 import type { Nullable } from "@/types/utils";
 import { persistentAtom } from "@nanostores/persistent";
 import { computed } from "nanostores";
+import { err, ok } from "neverthrow";
 import { wrapValidation } from "@/lib/arktype";
 import { getLocalStorageKey } from "@/lib/consts";
+import { ItemImpl } from "@/lib/item";
 import { ItemNumber as ItemNumberType } from "@/types/item";
 import { OrderItemAmount } from "@/types/order";
 import { $discounts } from "./discounts";
@@ -234,3 +237,35 @@ export const $filledOrderRows = computed(
   [$orderRows],
   (rows) => getFilledOrderRows(rows),
 );
+export type ExtraPortionError
+  = | "EXTRA_PORTION_WITHOUT_ITEM"
+    | "EXTRA_PORTION_EXCEEDED";
+
+/**
+ * 団子と増量の数量整合性を検証する（ドメインルール: 団子の個数 ≧ 増量の個数）
+ */
+export function validateExtraPortion(
+  items = $normalizedCurrentOrderItems.get(),
+): Result<void, ExtraPortionError> {
+  let dangoCount = 0;
+  let extraCount = 0;
+
+  for (const item of items) {
+    const group = ItemImpl(item).getGroup();
+    if (item.name === "増量") {
+      extraCount += item.amount;
+    } else if (group?.name === "だんご") {
+      dangoCount += item.amount;
+    }
+  }
+
+  if (extraCount > 0 && dangoCount === 0) {
+    return err("EXTRA_PORTION_WITHOUT_ITEM");
+  }
+
+  if (extraCount > dangoCount) {
+    return err("EXTRA_PORTION_EXCEEDED");
+  }
+
+  return ok(undefined);
+}

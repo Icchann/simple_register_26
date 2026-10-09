@@ -143,3 +143,4 @@ styled-system-studio
 
 .vscode/settings.json
 scripts/input
+.build/
