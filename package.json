@@ -13,7 +13,8 @@
     "typecheck": "react-router typegen && tsc",
     "clean": "bunx rimraf ./node_modules ./.react-router ./dist ./panda",
     "lint": "eslint \"./src/**\"",
-    "typo": "cspell \"./src/**\" --gitignore"
+    "typo": "cspell \"./src/**\" --gitignore",
+    "export": "bun run ./scripts/export.ts"
   },
   "dependencies": {
     "@formkit/tempo": "^0.1.2",

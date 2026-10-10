@@ -9,7 +9,7 @@ import { NumberInput } from "@/components/atomic/NumberInput";
 import { ReceiptNumberInput } from "@/components/overlays/ReceiptNumberInput";
 import { wrapValidation } from "@/lib/arktype";
 import { findItemByNumber } from "@/lib/stores/current-order";
-import { $items, toggleItemSoldOut, toggleItemSoldOutByNumber } from "@/lib/stores/items";
+import { $items, $soldOutItemIds, resetAllSoldOutItems, toggleItemSoldOut, toggleItemSoldOutByNumber } from "@/lib/stores/items";
 import { changeOrderStatus } from "@/lib/stores/orders";
 import { $overlayType } from "@/lib/stores/overlay";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -22,6 +22,7 @@ export type MenuDialogProps = {
 export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
   const overlayType = useStore($overlayType);
   const items = useStore($items);
+  const soldOutItemIds = useStore($soldOutItemIds);
   const itemNumberInputRef = useRef<HTMLInputElement>(null);
   const [itemEditFeedback, setItemEditFeedback] = useState<string | null>(null);
 
@@ -201,6 +202,18 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
           <p.span color="gray.700" fontSize="xs" fontWeight="bold">
             (番号入力後 [確定])
           </p.span>
+          {soldOutItemIds.length > 0 && (
+            <Button
+              onClick={() => {
+                resetAllSoldOutItems();
+                setItemEditFeedback("すべての売り切れを解除しました（全商品が販売中）");
+              }}
+              size="sm"
+              variant="outlined"
+            >
+              {`売り切れを全解除 (${soldOutItemIds.length}件)`}
+            </Button>
+          )}
           {itemEditFeedback != null && (
             <p.span
               bg="blue.50"
