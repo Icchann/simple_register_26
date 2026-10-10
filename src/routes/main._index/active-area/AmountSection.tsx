@@ -230,7 +230,7 @@ export function AmountSection(): ReactElement {
       <p.table w="full">
         <Table.head>
           <p.tr>
-            <p.th p="0!" w="24"></p.th>
+            <p.th p="0!" w="20"></p.th>
             <p.th p="0!" w="stretch"></p.th>
           </p.tr>
         </Table.head>
@@ -241,7 +241,7 @@ export function AmountSection(): ReactElement {
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <p.code fontSize="clamp(1.25rem, 1.8vw, 1.5rem)">{total.toLocaleString("ja-JP")}</p.code>
+                <p.code fontSize="clamp(1.2rem, 1.6vw, 1.5rem)">{total.toLocaleString("ja-JP")}</p.code>
                 <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
@@ -365,8 +365,9 @@ export function AmountSection(): ReactElement {
                 </HStack>
                 <p.code
                   color="red.600"
-                  fontSize="clamp(1.25rem, 1.8vw, 1.5rem)"
-                  w="32"
+                  fontSize="clamp(1.2rem, 1.6vw, 1.5rem)"
+                  minW="24"
+                  textAlign="right"
                 >
                   {totalDiscount > 0 ? `-${totalDiscount.toLocaleString("ja-JP")}` : "0"}
                 </p.code>
@@ -382,7 +383,7 @@ export function AmountSection(): ReactElement {
               <HStack gap="2" justifyContent="flex-end">
                 <NumberInput
                   disabled={orderPhase !== "PROCESS_PAYMENT"}
-                  fontSize="clamp(1.25rem, 1.8vw, 1.5rem)"
+                  fontSize="clamp(1.2rem, 1.6vw, 1.5rem)"
                   inputMode="numeric"
                   onChange={(event) => {
                     // カンマを除去して数値のみを保存
@@ -442,7 +443,7 @@ export function AmountSection(): ReactElement {
                   ref={depositInputRef}
                   textAlign="right"
                   value={depositAmountDisplay}
-                  w="32"
+                  w="clamp(9rem, 13vw, 11rem)"
                 />
                 <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
@@ -454,7 +455,7 @@ export function AmountSection(): ReactElement {
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <p.code fontSize="clamp(1.25rem, 1.8vw, 1.5rem)">{change.toLocaleString("ja-JP")}</p.code>
+                <p.code fontSize="clamp(1.2rem, 1.6vw, 1.5rem)">{change.toLocaleString("ja-JP")}</p.code>
                 <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>

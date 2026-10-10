@@ -214,7 +214,7 @@ export function ActiveArea(): ReactElement {
         },
       })}
       display="grid"
-      gridTemplateColumns="minmax(280px, 4fr) minmax(380px, 4fr) minmax(300px, 3fr)"
+      gridTemplateColumns="minmax(260px, 3.5fr) minmax(340px, 4fr) minmax(360px, 3.5fr)"
       minH="0"
       overflow="hidden"
       position="relative"

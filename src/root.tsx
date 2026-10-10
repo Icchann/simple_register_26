@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import type { Route } from "./+types/root";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { styled as p } from "panda/jsx";
 import { useEffect } from "react";
@@ -52,6 +53,40 @@ export default function (): ReactElement {
     }
   }, []);
 
+  useEffect(() => {
+    let currentZoom = 1.0;
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (!e.ctrlKey && !e.metaKey)
+        return;
+
+      if (e.key === "+" || e.key === "=" || e.key === ";") {
+        e.preventDefault();
+        currentZoom = Math.min(1.8, Math.round((currentZoom + 0.1) * 10) / 10);
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        currentZoom = Math.max(0.6, Math.round((currentZoom - 0.1) * 10) / 10);
+      } else if (e.key === "0") {
+        e.preventDefault();
+        currentZoom = 1.0;
+      } else {
+        return;
+      }
+
+      if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+        getCurrentWebview().setZoom(currentZoom).catch(() => {
+          document.documentElement.style.zoom = String(currentZoom);
+        });
+      } else {
+        document.documentElement.style.zoom = String(currentZoom);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return (): void => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
   return (
     <Expanded>
       <p.main>
