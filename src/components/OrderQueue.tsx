@@ -382,7 +382,11 @@ const ConfirmedOrdersList = memo(
       return filteredOrders.map((order) => ({
         ...order,
         items: order.items
-          .filter((item) => order.status === "UNCONFIRMED" || item.amount > 0)
+          .filter((item) => {
+            const hasAmount = order.status === "UNCONFIRMED" || item.amount > 0;
+            const matchesGroup = filterGroupId == null || itemGroupMap.get(item.id) === filterGroupId;
+            return hasAmount && matchesGroup;
+          })
           .map((item) => ({
             ...item,
             itemNumber: itemNumberMap.get(item.id) ?? null,
@@ -452,14 +456,14 @@ const UnconfirmedOrderPreview = memo(
     }
 
     // グループIDフィルター（プレビューにも適用）
-    if (filterGroupId != null) {
-      const itemGroupMap = new Map<string, string>();
-      items.forEach((group) => {
-        group.children.forEach((child) => {
-          itemGroupMap.set(child.id, group.id);
-        });
+    const itemGroupMap = new Map<string, string>();
+    items.forEach((group) => {
+      group.children.forEach((child) => {
+        itemGroupMap.set(child.id, group.id);
       });
+    });
 
+    if (filterGroupId != null) {
       const hasTargetGroup = normalizedItems.some(
         (item) => itemGroupMap.get(item.id) === filterGroupId,
       );
@@ -494,7 +498,10 @@ const UnconfirmedOrderPreview = memo(
       createdAt: new Date().toISOString(),
       status: "UNCONFIRMED" as const,
       statusChange: [],
-      items: normalizedItems.map((item) => ({
+      items: (filterGroupId != null
+        ? normalizedItems.filter((item) => itemGroupMap.get(item.id) === filterGroupId)
+        : normalizedItems
+      ).map((item) => ({
         ...item,
         itemNumber: item.itemNumber,
       })),
