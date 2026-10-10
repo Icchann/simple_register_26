@@ -30,22 +30,28 @@ export function DangoFlavorDialog({
 
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         onClose();
         return;
       }
 
       if (e.key === "Backspace") {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         if (secondFlavor != null) {
           setSecondFlavor(null);
-        } else if (firstFlavor != null && initialFlavor == null) {
-          setFirstFlavor(null);
+        } else {
+          onClose();
         }
         return;
       }
 
       if (e.key === "Enter") {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         if (firstFlavor != null) {
           if (secondFlavor != null) {
             // 2つの味（同種なら単一味に正規化）
@@ -65,6 +71,8 @@ export function DangoFlavorDialog({
         return;
 
       e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
       const chosenFlavor = matched.name;
 
       if (firstFlavor == null) {
@@ -87,9 +95,8 @@ export function DangoFlavorDialog({
     return <></>;
 
   const promptMessage = firstFlavor == null
-    ? "味を選んでください (テンキー 1〜4)"
-    : "もう一つの味を選んでください(味が一つの場合はそのままエンター)";
-
+    ? "味を選んでください (テンキー 1〜4 / [BS] 戻る)"
+    : "もう一つの味を選んでください (1味の場合はEnter / [BS] 戻る)";
   return (
     <p.div
       bottom="0"
@@ -250,7 +257,7 @@ export function DangoFlavorDialog({
         <HStack color="gray.500" fontSize="xs" justifyContent="space-between" pt="1" w="full">
           <p.span>[1〜4] 味選択</p.span>
           <p.span>[Enter] 1味で確定 / 次へ</p.span>
-          <p.span>[Esc] キャンセル</p.span>
+          <p.span>[BS] 戻る / キャンセル</p.span>
         </HStack>
       </VStack>
     </p.div>

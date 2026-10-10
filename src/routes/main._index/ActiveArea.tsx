@@ -74,6 +74,9 @@ export function ActiveArea(): ReactElement {
         if (currentOverlayType === overlayType) {
           menuDialogRef.current?.close();
           closeOverlay();
+          requestAnimationFrame(() => {
+            focusReceiptInput();
+          });
         } else {
           // 別のオーバーレイが開いている場合は一旦閉じてから新しいものを開く
           if (currentOverlayType !== null) {
@@ -229,6 +232,9 @@ export function ActiveArea(): ReactElement {
       <Dialog
         onClose={() => {
           closeOverlay();
+          requestAnimationFrame(() => {
+            focusReceiptInput();
+          });
         }}
         ref={menuDialogRef}
       >
@@ -236,6 +242,9 @@ export function ActiveArea(): ReactElement {
           onClose={() => {
             menuDialogRef.current?.close();
             closeOverlay();
+            requestAnimationFrame(() => {
+              focusReceiptInput();
+            });
           }}
         />
       </Dialog>

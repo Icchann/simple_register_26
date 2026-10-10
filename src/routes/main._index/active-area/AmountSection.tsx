@@ -6,7 +6,7 @@ import { Button } from "@/components/atomic/Button";
 import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
-import { focusOrderLastRowProduct } from "@/lib/focus-manager";
+import { focusOrderLastRowProduct, focusReceiptInput } from "@/lib/focus-manager";
 import {
   $currentOrder,
   $depositAmount,
@@ -224,8 +224,10 @@ export function AmountSection(): ReactElement {
     dotPressedRef.current = false;
 
     setStatusWithTimeout({ type: "ORDER_CONFIRMED", receiptNumber });
+    requestAnimationFrame(() => {
+      focusReceiptInput();
+    });
   };
-
   return (
     <VStack alignItems="flex-start" gap="4" w="full">
       <p.table tableLayout="fixed" w="full">

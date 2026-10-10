@@ -126,11 +126,13 @@ export function Information(): ReactElement {
   // フォーカス処理
   useEffect(() => {
     if (orderPhase === "CHECK_RECEIPT_NUMBER") {
-      const input = receiptInputRef.current;
-      if (input) {
-        input.focus();
-        input.select();
-      }
+      requestAnimationFrame(() => {
+        const input = receiptInputRef.current;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      });
     }
   }, [orderPhase]);
 

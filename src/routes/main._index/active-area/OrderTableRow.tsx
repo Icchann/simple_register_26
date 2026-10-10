@@ -10,6 +10,7 @@ import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
 import { ItemImpl } from "@/lib/item";
+import { DangoFlavorImpl } from "@/lib/order";
 import { findItemByNumber } from "@/lib/stores/current-order";
 import { $orderPhase } from "@/lib/stores/phase";
 import { ItemNumber } from "@/types/item";
@@ -48,21 +49,43 @@ function ItemName(
   }
 
   return (
-    <p.p
+    <p.div
       fontSize="clamp(11px, 0.9vw, 14px)"
       overflow="hidden"
       textOverflow="ellipsis"
       whiteSpace="nowrap"
     >
-      {
-        flavors && flavors.length > 0
-          ? `だんご (${flavors.join(" + ")})`
-          : match(ItemImpl(itemWithItemNumber).getGroup()?.name)
-            .with(P.nullish, () => "")
-            .otherwise((name) => `${name}/`)
-            + itemWithItemNumber.name
-      }
-    </p.p>
+      {flavors && flavors.length > 0
+        ? (
+            <HStack alignItems="center" display="inline-flex" flexWrap="nowrap" gap="1">
+              <p.span>だんご</p.span>
+              {flavors.map((flavor) => {
+                const color = DangoFlavorImpl(flavor).toColor();
+                return (
+                  <p.span
+                    bg={color.bg}
+                    borderColor={color.borderColor}
+                    borderRadius="sm"
+                    borderWidth="1px"
+                    color={color.color}
+                    fontSize="clamp(10px, 0.8vw, 12px)"
+                    fontWeight="bold"
+                    key={flavor}
+                    px="1"
+                    py="0.5"
+                    whiteSpace="nowrap"
+                  >
+                    {flavor}
+                  </p.span>
+                );
+              })}
+            </HStack>
+          )
+        : match(ItemImpl(itemWithItemNumber).getGroup()?.name)
+          .with(P.nullish, () => "")
+          .otherwise((name) => `${name}/`)
+          + itemWithItemNumber.name}
+    </p.div>
   );
 }
 

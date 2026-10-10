@@ -40,11 +40,6 @@
     "name": "缶ジュース",
     "children": [
       {
-        "id": "bdxpj17blx4jza95ii92zxdm",
-        "name": "Qoo オレンジ",
-        "price": 100
-      },
-      {
         "id": "n1rbanpsl0s6jfn223y3j5cr",
         "name": "ﾌｧﾝﾀ ｸﾞﾚｰﾌﾟ",
         "price": 100
@@ -78,6 +73,11 @@
       {
         "id": "m8gqxv1kamut7ernwoxhdexf",
         "name": "麦茶",
+        "price": 100
+      },
+      {
+        "id": "bdxpj17blx4jza95ii92zxdm",
+        "name": "なっちゃんオレンジ",
         "price": 100
       }
     ]

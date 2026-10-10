@@ -467,15 +467,27 @@ export function OrderTable(): ReactElement {
   };
 
   const handleFlavorCancel = (): void => {
-    const { rowId, initialFlavor, displayIndex, isTab } = flavorDialogState;
+    const { rowId, displayIndex } = flavorDialogState;
     setFlavorDialogState((prev) => ({ ...prev, isOpen: false }));
 
-    if (initialFlavor != null && initialFlavor !== "") {
-      handleFlavorConfirm(rowId, [initialFlavor], displayIndex, isTab);
-    } else {
-      setPendingFocusField("productCode");
-      setPendingFocusIndex(displayIndex);
-    }
+    updateOrderRows((previousRows) =>
+      previousRows.map((candidate) =>
+        candidate.id === rowId
+          ? { ...candidate, productCode: "", quantity: "", flavors: undefined }
+          : candidate,
+      ),
+    );
+
+    setPendingFocusField("productCode");
+    setPendingFocusIndex(displayIndex);
+
+    requestAnimationFrame(() => {
+      const input = rowRefs[displayIndex]?.productCode.current;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
   };
 
   return (
