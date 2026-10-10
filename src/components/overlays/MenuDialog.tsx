@@ -2,14 +2,18 @@ import type { ReactElement } from "react";
 import { useStore } from "@nanostores/react";
 import { css } from "panda/css";
 import { Grid, HStack, styled as p, VStack } from "panda/jsx";
+import { useEffect, useRef, useState } from "react";
 import { match } from "ts-pattern";
 import { Button } from "@/components/atomic/Button";
 import { NumberInput } from "@/components/atomic/NumberInput";
 import { ReceiptNumberInput } from "@/components/overlays/ReceiptNumberInput";
+import { wrapValidation } from "@/lib/arktype";
+import { findItemByNumber } from "@/lib/stores/current-order";
 import { $items, toggleItemSoldOut, toggleItemSoldOutByNumber } from "@/lib/stores/items";
 import { changeOrderStatus } from "@/lib/stores/orders";
 import { $overlayType } from "@/lib/stores/overlay";
 import { setStatusWithTimeout } from "@/lib/stores/status";
+import { ItemNumber } from "@/types/item";
 
 export type MenuDialogProps = {
   onClose: () => void;
@@ -18,6 +22,21 @@ export type MenuDialogProps = {
 export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
   const overlayType = useStore($overlayType);
   const items = useStore($items);
+  const itemNumberInputRef = useRef<HTMLInputElement>(null);
+  const [itemEditFeedback, setItemEditFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (overlayType === "ITEM_EDIT") {
+      requestAnimationFrame(() => {
+        itemNumberInputRef.current?.focus();
+        itemNumberInputRef.current?.select();
+      });
+    } else {
+      requestAnimationFrame(() => {
+        setItemEditFeedback(null);
+      });
+    }
+  }, [overlayType]);
 
   const { title, bgClassName, icon } = match(overlayType)
     .with("COOKING_COMPLETE", () => ({
@@ -140,30 +159,60 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
                 <HStack gap="2">
                   <p.span fontSize="sm" fontWeight="bold">商品番号:</p.span>
                   <NumberInput
-                    autoFocus
-                    h="9"
+                    h="10"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        const val = Number.parseInt(e.currentTarget.value, 10);
+                        const raw = e.currentTarget.value.trim();
+                        if (raw === "") {
+                          return;
+                        }
+                        const val = Number.parseInt(raw, 10);
                         if (!Number.isNaN(val)) {
-                          toggleItemSoldOutByNumber(val);
+                          const success = toggleItemSoldOutByNumber(val);
+                          if (success) {
+                            const itemNumberResult = wrapValidation(ItemNumber(val));
+                            const targetItem = itemNumberResult.isOk()
+                              ? findItemByNumber(itemNumberResult.value)
+                              : null;
+                            const statusLabel = targetItem?.isSoldOut === true ? "【売り切れ(✕)】" : "【販売中】";
+                            setItemEditFeedback(`商品「${targetItem?.name ?? val}」を ${statusLabel} に切り替えました`);
+                          } else {
+                            setItemEditFeedback(`商品番号「${raw}」に該当する商品はありません`);
+                          }
                           e.currentTarget.value = "";
                         }
                       }
                     }}
                     outline={{
                       base: "2px solid",
-                      _focus: "3px solid",
+                      _focus: "4px solid",
                     }}
                     outlineColor="black"
+                    ref={itemNumberInputRef}
                     textAlign="center"
-                    w="16"
+                    w="20"
                   />
                   <p.span color="gray.700" fontSize="xs">
                     (番号入力後 Enter)
                   </p.span>
                 </HStack>
+                {itemEditFeedback != null && (
+                  <p.p
+                    bg="white"
+                    borderColor="gray.400"
+                    borderRadius="sm"
+                    borderWidth="1px"
+                    color="blue.900"
+                    fontSize="xs"
+                    fontWeight="bold"
+                    px="2"
+                    py="1"
+                    textAlign="center"
+                  >
+                    {itemEditFeedback}
+                  </p.p>
+                )}
                 <VStack
                   bg="white/70"
                   borderColor="gray.400"
