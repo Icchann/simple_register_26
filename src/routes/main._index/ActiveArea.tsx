@@ -52,6 +52,10 @@ export function ActiveArea(): ReactElement {
   // テンキーでオーバーレイを表示/切り替え/閉じる
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
       const overlayType = match(event)
         .with({ key: "/" }, { keyCode: 111 }, () => "COOKING_COMPLETE" as const)
         .with({ key: "*" }, () => "PICKUP_COMPLETE" as const)

@@ -227,11 +227,11 @@ export function AmountSection(): ReactElement {
 
   return (
     <VStack alignItems="flex-start" gap="4" w="full">
-      <p.table w="full">
+      <p.table tableLayout="fixed" w="full">
         <Table.head>
           <p.tr>
-            <p.th p="0!" w="20"></p.th>
-            <p.th p="0!" w="stretch"></p.th>
+            <p.th p="0!" w="28"></p.th>
+            <p.th p="0!" w="auto"></p.th>
           </p.tr>
         </Table.head>
         <Table.body>

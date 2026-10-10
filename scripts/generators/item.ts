@@ -9,19 +9,19 @@ const groupDefinitions = [
   {
     name: "ポップコーン",
     price: 150,
-    helperDiscount: 0,
+    helperDiscount: 150,
     items: ["塩", "カレー", "キャラメル"],
   },
   {
     name: "缶ジュース",
     price: 100,
-    helperDiscount: 0,
+    helperDiscount: 100,
     items: ["ファンタ", "コーラ"],
   },
   {
     name: "ペットボトル",
     price: 150,
-    helperDiscount: 0,
+    helperDiscount: 150,
     items: ["チルソン", "アクエリ", "MATCH", "水", "麦茶"],
   },
 ] as const;

@@ -410,7 +410,7 @@ export function OrderTable(): ReactElement {
   };
 
   return (
-    <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} w="full">
+    <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} tableLayout="fixed" w="full">
       <Table.head>
         <p.tr>
           <p.th w="10" whiteSpace="nowrap">#</p.th>
