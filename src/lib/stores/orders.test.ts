@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { type } from "arktype";
-import { orderRequiresCooking } from "@/lib/order";
+import { DANGO_FLAVORS, DangoFlavorImpl, orderRequiresCooking } from "@/lib/order";
 import { MAX_ORDER_ITEM_AMOUNT, Order, OrderItemAmount } from "@/types/order";
 import { $items } from "./items";
 import { $orders, changeOrderStatus } from "./orders";
@@ -125,5 +125,16 @@ describe("orderRequiresCooking for drink-only orders", () => {
     if (canItem) {
       expect(orderRequiresCooking([{ id: dangoItem.id }, { id: canItem.id }])).toBe(true);
     }
+  });
+});
+
+describe("DANGO_FLAVORS and 味なし", () => {
+  it("includes 味なし with key 0 and gray color", () => {
+    const plainFlavor = DANGO_FLAVORS.find((f) => f.name === "味なし");
+    expect(plainFlavor).toBeDefined();
+    expect(plainFlavor?.key).toBe("0");
+
+    const color = DangoFlavorImpl("味なし").toColor();
+    expect(color.bg).toBe("gray.100");
   });
 });

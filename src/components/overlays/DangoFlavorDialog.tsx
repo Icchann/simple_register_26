@@ -93,7 +93,7 @@ export function DangoFlavorDialog({
         return;
       }
 
-      // 数字キー 1〜4 による味の選択
+      // 数字キー 0〜4 による味の選択
       const matched = DANGO_FLAVORS.find((f) => f.key === e.key);
       if (matched == null) {
         e.preventDefault();
@@ -106,6 +106,12 @@ export function DangoFlavorDialog({
       e.stopImmediatePropagation();
       const chosenFlavor = matched.name;
       if (isFlavorSoldOut(chosenFlavor)) {
+        return;
+      }
+
+      // 「味なし」の場合は単一確定
+      if (chosenFlavor === "味なし") {
+        onConfirm(["味なし"]);
         return;
       }
 
@@ -129,7 +135,7 @@ export function DangoFlavorDialog({
     return <></>;
 
   const promptMessage = firstFlavor == null
-    ? "味を選んでください (テンキー 1〜4 / [BS] 戻る)"
+    ? "味を選んでください (テンキー 1〜4: 味選択 / 0: 味なし / [BS] 戻る)"
     : "もう一つの味を選んでください (1味の場合はEnter / [BS] 戻る)";
   return (
     <p.div
@@ -262,6 +268,10 @@ export function DangoFlavorDialog({
                   if (isSoldOut) {
                     return;
                   }
+                  if (flavor.name === "味なし") {
+                    onConfirm(["味なし"]);
+                    return;
+                  }
                   if (firstFlavor == null) {
                     setFirstFlavor(flavor.name);
                   } else {
@@ -305,7 +315,7 @@ export function DangoFlavorDialog({
 
         {/* 確定・キャンセル操作ガイド */}
         <HStack color="gray.500" fontSize="xs" justifyContent="space-between" pt="1" w="full">
-          <p.span>[1〜4] 味選択</p.span>
+          <p.span>[1〜4] 味選択 / [0] 味なし</p.span>
           <p.span>[Enter] 1味で確定 / 次へ</p.span>
           <p.span>[BS] 戻る / キャンセル</p.span>
         </HStack>
