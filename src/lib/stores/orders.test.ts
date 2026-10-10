@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import { type } from "arktype";
+import { orderRequiresCooking } from "@/lib/order";
 import { MAX_ORDER_ITEM_AMOUNT, Order, OrderItemAmount } from "@/types/order";
+import { $items } from "./items";
 import { $orders, changeOrderStatus } from "./orders";
 
 describe("changeOrderStatus with duplicate receipt numbers", () => {
@@ -89,5 +91,39 @@ describe("OrderItemAmount and 0-amount items", () => {
     expect(OrderItemAmount(-1) instanceof type.errors).toBe(true);
     // >100 is invalid
     expect(OrderItemAmount(101) instanceof type.errors).toBe(true);
+  });
+});
+
+describe("orderRequiresCooking for drink-only orders", () => {
+  it("returns false for cans and plastic bottles (no cooking needed)", () => {
+    const items = $items.get();
+    const canGroup = items.find((g) => g.name === "缶ジュース");
+    const bottleGroup = items.find((g) => g.name === "ペットボトル");
+    const canItem = canGroup?.children[0];
+    const bottleItem = bottleGroup?.children[0];
+    expect(canItem).toBeDefined();
+    expect(bottleItem).toBeDefined();
+
+    if (!canItem || !bottleItem) {
+      return;
+    }
+    expect(orderRequiresCooking([{ id: canItem.id }, { id: bottleItem.id }])).toBe(false);
+  });
+
+  it("returns true when order includes dango items", () => {
+    const items = $items.get();
+    const dangoGroup = items.find((g) => g.name === "だんご");
+    const canGroup = items.find((g) => g.name === "缶ジュース");
+    const dangoItem = dangoGroup?.children[0];
+    const canItem = canGroup?.children[0];
+    expect(dangoItem).toBeDefined();
+    if (!dangoItem) {
+      return;
+    }
+
+    expect(orderRequiresCooking([{ id: dangoItem.id }])).toBe(true);
+    if (canItem) {
+      expect(orderRequiresCooking([{ id: dangoItem.id }, { id: canItem.id }])).toBe(true);
+    }
   });
 });

@@ -7,6 +7,7 @@ import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
 import { focusOrderLastRowProduct, focusReceiptInput } from "@/lib/focus-manager";
+import { orderRequiresCooking } from "@/lib/order";
 import {
   $currentOrder,
   $depositAmount,
@@ -197,18 +198,22 @@ export function AmountSection(): ReactElement {
       const cleanedDeposit = (depositAmount || "0").replace(/,/g, "");
       const depositAmountNumber = Number.parseInt(cleanedDeposit, 10);
 
+      const initialStatus = orderRequiresCooking(orderItems)
+        ? ("WAITING_COOKING" as const)
+        : ("WAITING_PICKUP" as const);
+
       const newOrder: Order = {
         id: Order.get("id").from(orderId),
         receiptNumber,
         createdAt, // 受付番号発行時刻（Information.tsx で記録済み）
-        status: "WAITING_COOKING",
+        status: initialStatus,
         statusChange: [
           {
             to: "UNCONFIRMED",
             at: createdAt, // 受付番号発行時刻
           },
           {
-            to: "WAITING_COOKING",
+            to: initialStatus,
             at: now, // 注文確定時刻
           },
         ],

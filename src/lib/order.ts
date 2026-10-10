@@ -1,9 +1,11 @@
 /* eslint-disable ts/explicit-function-return-type */
 
+import type { Item } from "@/types/item";
 import type { OrderStatus } from "@/types/order";
 import type { Nullable } from "@/types/utils";
 import { token } from "panda/tokens";
 import { match } from "ts-pattern";
+import { ItemImpl } from "@/lib/item";
 
 // ref: https://github.com/type-challenges/type-challenges/issues/360#issue-747316677
 type CamelCase<S extends string> = S extends Lowercase<S>
@@ -67,4 +69,10 @@ export function DangoFlavorImpl(flavor: string) {
       .with("のり醤油", () => ({ bg: "emerald.100", borderColor: "emerald.300", color: "emerald.900" }))
       .otherwise(() => ({ bg: "gray.100", borderColor: "gray.300", color: "gray.800" })),
   };
+}
+
+export function orderRequiresCooking(items: ReadonlyArray<{ id: string }>): boolean {
+  // 缶ジュース・ペットボトル等のドリンクのみの場合は調理不要（直接「受取待ち」へ）
+  // だんご等、調理が必要な商品が含まれている場合は調理待ちとする
+  return items.some((item) => ItemImpl(item as unknown as Item).getGroup()?.name === "だんご");
 }
