@@ -7,10 +7,11 @@ import { BasicInfo } from "./BasicInfo";
 import { OrderQueue } from "./OrderQueue";
 import { PickupMonitor } from "./PickupMonitor";
 import { StatusBar } from "./StatusBar";
+import { UnfocusedNotice } from "./UnfocusedNotice";
 
 export default function (): ReactElement {
   return (
-    <Expanded basedOn="screen" overflowX="auto" overflowY="hidden">
+    <Expanded basedOn="screen" overflowX="auto" overflowY="hidden" position="relative">
       <p.div
         className={css({
           "& > *": {
@@ -40,6 +41,7 @@ export default function (): ReactElement {
         <p.div gridArea="active-area" minH="0" overflow="hidden"><ActiveArea /></p.div>
         <p.div gridArea="status-bar" minH="0"><StatusBar /></p.div>
       </p.div>
+      <UnfocusedNotice />
     </Expanded>
   );
 }

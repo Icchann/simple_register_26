@@ -171,11 +171,26 @@ export function OrderTable(): ReactElement {
         setPendingFocusField("productCode");
         setPendingFocusIndex(displayRows.length - 1);
       },
+      focusActiveProductInput: () => {
+        if (displayRows.length === 0) {
+          return;
+        }
+        const targetIndex = pendingFocusIndex ?? (displayRows.length - 1);
+        const targetField = pendingFocusField ?? "productCode";
+        const input = rowRefs[targetIndex]?.[targetField].current;
+        if (input) {
+          input.focus();
+          input.select();
+        } else {
+          setPendingFocusField(targetField);
+          setPendingFocusIndex(targetIndex);
+        }
+      },
     });
     return (): void => {
       registerOrderFocusHelpers({});
     };
-  }, [displayRows.length]);
+  }, [displayRows.length, pendingFocusIndex, pendingFocusField, rowRefs]);
 
   useEffect(() => {
     if (!isActive) {

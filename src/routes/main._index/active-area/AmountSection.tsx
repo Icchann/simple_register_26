@@ -6,7 +6,12 @@ import { Button } from "@/components/atomic/Button";
 import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
-import { focusOrderLastRowProduct, focusReceiptInput } from "@/lib/focus-manager";
+import {
+  focusOrderLastRowProduct,
+  focusReceiptInput,
+  registerDiscountFocusHelper,
+  registerPaymentFocusHelper,
+} from "@/lib/focus-manager";
 import { orderRequiresCooking } from "@/lib/order";
 import {
   $currentOrder,
@@ -162,6 +167,30 @@ export function AmountSection(): ReactElement {
     }
   }, [rightStep]);
 
+  useEffect(() => {
+    registerDiscountFocusHelper(() => {
+      const input = discountInputRef.current;
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    });
+    registerPaymentFocusHelper(() => {
+      if (rightStep === "CONFIRM") {
+        confirmButtonRef.current?.focus();
+      } else {
+        const input = depositInputRef.current;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }
+    });
+    return (): void => {
+      registerDiscountFocusHelper(null);
+      registerPaymentFocusHelper(null);
+    };
+  }, [rightStep]);
   const handleConfirm = (): void => {
     const now = new Date().toISOString();
 
@@ -490,6 +519,7 @@ export function AmountSection(): ReactElement {
           bg: "purple.500",
           color: "white",
         }}
+        data-register-focus="true"
         disabled={rightStep !== "CONFIRM"}
         mx="auto"
         onBlur={() => {
