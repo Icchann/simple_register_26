@@ -70,8 +70,9 @@ match(status)
   .exhaustive()
 ```
 
-キー操作→オーバーレイ表示の切替（`src/routes/main._index/ActiveArea.tsx`）でも同様です。副作用（イベント停止等）は最小限で、UI の状態管理はストアへ委譲します。
+注文ステータスの変更（`src/lib/stores/orders.ts` の `changeOrderStatus`）でも `ts-pattern` で各ステータスに対する有効な遷移元（例: `WAITING_PICKUP` は `WAITING_COOKING` からのみ）を網羅的に解決しています。受付番号が重複した場合でも、作成日時昇順（FIFO）かつ有効な遷移元ステータスを持つ注文を順に遷移させることで、重複時に「調理待ち」から消えなくなる不具合を防いでいます。
 
+キー操作→オーバーレイ表示の切替（`src/routes/main._index/ActiveArea.tsx`）でも同様です。副作用（イベント停止等）は最小限で、UI の状態管理はストアへ委譲します。
 ## PandaCSS の方針（tokens / cva / sva / jsx）
 
 - tokens
@@ -122,7 +123,8 @@ function sanitizeNumericString(value: string): string {
 - `atomic/` は小さな UI パーツ（Button, NumberInput, Card, Content など）
 - 大きめの UI（例: `PickupMonitor`）は `sva` でスロット化しつつ、状態はストアから読む
 - ドメイン処理（集計/正規化）は `lib/` に寄せ、コンポーネントは呼び出すだけ
-
+- メイン画面の割引入力（`src/routes/main._index/active-area/AmountSection.tsx`）では、`$discounts` から割引番号と名称を取得して一覧表示し、未入力時は「未入力: 割引なし」の案内を表示します。
+- メイン画面レイアウト（`src/routes/main._index/`）では、`route.tsx` のグリッド行を `repeat(5, minmax(0, 1fr)) auto` とし、`StatusBar` を最下部に固定しています。商品登録行（`OrderTable`）は `MiddleArea`（`overflowY="auto"`, `minH="0"`）内でスクロールし、ヘッダを固定表示します。また、解像度不足による要素重なりを防ぐため、Tauri ウィンドウの最小サイズ（1024x700）および `StatusBar` での解像度バリデーション警告を設けています。
 ## エラーハンドリングの約束
 
 - ユーザー入力/外部入出力 → ArkType + `wrapValidation` → `Result`

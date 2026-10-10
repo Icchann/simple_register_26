@@ -3,6 +3,7 @@ import type { Status } from "@/lib/stores/status";
 import { useStore } from "@nanostores/react";
 import { css } from "panda/css";
 import { HStack, styled as p } from "panda/jsx";
+import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
 import { Expanded } from "@/components/atomic/Expanded";
 import { ReceiptNumberImpl } from "@/lib/order";
@@ -223,7 +224,21 @@ function Status(): ReactElement {
 export function StatusBar(): ReactElement {
   const systemStartedTimeStr = useStore($systemStartTimeStr).timeOnly;
   const systemUptimeStr = useStore($systemUptimeMs());
+  const [isResolutionLow, setIsResolutionLow] = useState(() => {
+    if (typeof window === "undefined")
+      return false;
+    return window.innerWidth < 1024 || window.innerHeight < 680;
+  });
 
+  useEffect(() => {
+    const handleResize = (): void => {
+      setIsResolutionLow(window.innerWidth < 1024 || window.innerHeight < 680);
+    };
+    window.addEventListener("resize", handleResize);
+    return (): void => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   return (
     <Expanded
       alignItems="center"
@@ -249,6 +264,22 @@ export function StatusBar(): ReactElement {
           <Status />
         </HStack>
       </HStack>
+      {isResolutionLow && (
+        <HStack
+          bg="amber.400"
+          color="black"
+          fontSize="xs"
+          fontWeight="bold"
+          px="2"
+          py="0.5"
+          rounded="sm"
+        >
+          <IconMaterialSymbolsWarning />
+          <p.span>
+            画面解像度が不足しています（推奨: 1280×720以上 / ウィンドウを最大化または全画面表示してください）
+          </p.span>
+        </HStack>
+      )}
       <HStack>
         <p.p color="gray.500">
           システム開始時刻:

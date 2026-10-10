@@ -10,7 +10,7 @@ import { StatusBar } from "./StatusBar";
 
 export default function (): ReactElement {
   return (
-    <Expanded basedOn="screen">
+    <Expanded basedOn="screen" overflowX="auto" overflowY="hidden">
       <p.div
         className={css({
           "& > *": {
@@ -28,14 +28,17 @@ export default function (): ReactElement {
           "status-bar status-bar"
         `}
         gridTemplateColumns="2fr 3fr"
-        gridTemplateRows="1fr 1fr 1fr 1fr 1fr auto"
+        gridTemplateRows="repeat(5, minmax(0, 1fr)) auto"
         h="full"
+        minH="0"
+        minW="[1024px]"
+        overflow="hidden"
       >
-        <p.div gridArea="basic-info"><BasicInfo /></p.div>
-        <p.div gridArea="pickup-monitor"><PickupMonitor /></p.div>
-        <p.div gridArea="order-queue"><OrderQueue /></p.div>
-        <p.div gridArea="active-area"><ActiveArea /></p.div>
-        <p.div gridArea="status-bar"><StatusBar /></p.div>
+        <p.div gridArea="basic-info" minH="0" overflow="hidden"><BasicInfo /></p.div>
+        <p.div gridArea="pickup-monitor" minH="0" overflow="hidden"><PickupMonitor /></p.div>
+        <p.div gridArea="order-queue" minH="0" overflow="hidden"><OrderQueue /></p.div>
+        <p.div gridArea="active-area" minH="0" overflow="hidden"><ActiveArea /></p.div>
+        <p.div gridArea="status-bar" minH="0"><StatusBar /></p.div>
       </p.div>
     </Expanded>
   );

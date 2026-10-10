@@ -19,6 +19,7 @@ import {
   setDepositAmount,
   setDiscountCode,
 } from "@/lib/stores/current-order";
+import { $discounts } from "@/lib/stores/discounts";
 import { $lastConfirmedOrderId, $orders } from "@/lib/stores/orders";
 import { $orderPhase } from "@/lib/stores/phase";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -50,7 +51,7 @@ export function AmountSection(): ReactElement {
   const depositAmount = useStore($depositAmount);
   const filledRows = useStore($filledOrderRows);
   const orderPhase = useStore($orderPhase);
-
+  const discounts = useStore($discounts);
   type RightStep = "DISCOUNT" | "DEPOSIT" | "CONFIRM";
   const [rightStep, setRightStep] = useState<RightStep>("DISCOUNT");
 
@@ -94,7 +95,7 @@ export function AmountSection(): ReactElement {
       totalDiscount: totalDiscountAmount,
       total: subtotalAmount - totalDiscountAmount,
     };
-  }, [filledRows, discountCode]);
+  }, [filledRows, discountInfo]);
 
   const change = useMemo(() => {
     // カンマを除去してから数値に変換
@@ -251,8 +252,33 @@ export function AmountSection(): ReactElement {
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <HStack>
-                  <p.p fontWeight="normal">割引番号</p.p>
+                <HStack gap="2">
+                  <VStack alignItems="flex-end" gap="0.5" lineHeight="tight">
+                    {(!discountCode || discountCode === "") && (
+                      <p.span
+                        color="gray.600"
+                        fontSize="xs"
+                        whiteSpace="nowrap"
+                      >
+                        未入力: 割引なし
+                      </p.span>
+                    )}
+                    {discounts.map((d) => {
+                      const isSelected = discountCode === d.discountNumber.toString();
+                      return (
+                        <p.span
+                          _current={{ color: "red.700", fontWeight: "bold" }}
+                          color="gray.700"
+                          data-current={isSelected ? "true" : undefined}
+                          fontSize="xs"
+                          key={d.id}
+                          whiteSpace="nowrap"
+                        >
+                          {`${d.discountNumber}: ${d.name}`}
+                        </p.span>
+                      );
+                    })}
+                  </VStack>
                   <HStack gap="2">
                     <p.code color="gray.500">D</p.code>
                     <NumberInput

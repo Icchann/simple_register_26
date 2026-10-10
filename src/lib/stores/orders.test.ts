@@ -1,0 +1,76 @@
+import { describe, expect, it } from "bun:test";
+import { Order } from "@/types/order";
+import { $orders, changeOrderStatus } from "./orders";
+
+describe("changeOrderStatus with duplicate receipt numbers", () => {
+  it("transitions duplicate receipt numbers in FIFO order without getting stuck", () => {
+    const order1 = Order.assert({
+      id: "a00000000000000000000001",
+      receiptNumber: 1,
+      createdAt: "2026-10-10T10:00:00.000Z",
+      status: "WAITING_COOKING",
+      statusChange: [
+        { to: "UNCONFIRMED", at: "2026-10-10T10:00:00.000Z" },
+        { to: "WAITING_COOKING", at: "2026-10-10T10:01:00.000Z" },
+      ],
+      items: [],
+      depositAmount: 1000,
+      appliedDiscount: null,
+    });
+
+    const order2 = Order.assert({
+      id: "a00000000000000000000002",
+      receiptNumber: 1,
+      createdAt: "2026-10-10T10:05:00.000Z",
+      status: "WAITING_COOKING",
+      statusChange: [
+        { to: "UNCONFIRMED", at: "2026-10-10T10:05:00.000Z" },
+        { to: "WAITING_COOKING", at: "2026-10-10T10:06:00.000Z" },
+      ],
+      items: [],
+      depositAmount: 1000,
+      appliedDiscount: null,
+    });
+
+    // Initialize store with two orders having identical receiptNumber
+    $orders.set([order1, order2]);
+
+    // 1st cooking complete -> should transition oldest order (order1)
+    const success1 = changeOrderStatus(1, "WAITING_PICKUP");
+    expect(success1).toBe(true);
+
+    const ordersAfterFirst = $orders.get();
+    const updated1 = ordersAfterFirst.find((o) => o.id === "a00000000000000000000001");
+    const updated2 = ordersAfterFirst.find((o) => o.id === "a00000000000000000000002");
+    expect(updated1?.status).toBe("WAITING_PICKUP");
+    expect(updated2?.status).toBe("WAITING_COOKING");
+
+    // 2nd cooking complete -> should transition remaining order (order2)
+    const success2 = changeOrderStatus(1, "WAITING_PICKUP");
+    expect(success2).toBe(true);
+
+    const ordersAfterSecond = $orders.get();
+    const secondUpdated1 = ordersAfterSecond.find((o) => o.id === "a00000000000000000000001");
+    const secondUpdated2 = ordersAfterSecond.find((o) => o.id === "a00000000000000000000002");
+    expect(secondUpdated1?.status).toBe("WAITING_PICKUP");
+    expect(secondUpdated2?.status).toBe("WAITING_PICKUP");
+
+    // 3rd cooking complete -> should return false since none in WAITING_COOKING
+    const success3 = changeOrderStatus(1, "WAITING_PICKUP");
+    expect(success3).toBe(false);
+
+    // 1st pickup complete -> should transition oldest order in WAITING_PICKUP (order1)
+    const pickupSuccess1 = changeOrderStatus(1, "PICKED_UP");
+    expect(pickupSuccess1).toBe(true);
+    expect($orders.get().find((o) => o.id === "a00000000000000000000001")?.status).toBe("PICKED_UP");
+    expect($orders.get().find((o) => o.id === "a00000000000000000000002")?.status).toBe("WAITING_PICKUP");
+
+    // 2nd pickup complete -> should transition order2
+    const pickupSuccess2 = changeOrderStatus(1, "PICKED_UP");
+    expect(pickupSuccess2).toBe(true);
+    expect($orders.get().find((o) => o.id === "a00000000000000000000002")?.status).toBe("PICKED_UP");
+    // 3rd pickup complete -> should return false
+    const pickupSuccess3 = changeOrderStatus(1, "PICKED_UP");
+    expect(pickupSuccess3).toBe(false);
+  });
+});
