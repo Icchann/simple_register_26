@@ -9,7 +9,7 @@ const groupDefinitions = [
   {
     name: "ポップコーン",
     price: 150,
-    helperDiscount: 50,
+    helperDiscount: 0,
     items: ["塩", "カレー", "キャラメル"],
   },
   {
