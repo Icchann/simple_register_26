@@ -9,9 +9,10 @@ export const DiscountNumber = type("0 <= number.integer#discountNumber <= 10");
 export type DiscountNumber = typeof DiscountNumber.infer;
 
 export const Item = type({
-  id: "string#itemId",
-  name: "string",
-  price: Price,
+  "id": "string#itemId",
+  "name": "string",
+  "price": Price,
+  "flavors?": "string[]",
 });
 export type Item = typeof Item.infer;
 

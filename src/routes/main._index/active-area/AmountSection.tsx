@@ -171,6 +171,7 @@ export function AmountSection(): ReactElement {
       name: item.name,
       price: item.price,
       amount: item.amount,
+      ...(item.flavors && item.flavors.length > 0 ? { flavors: item.flavors } : {}),
     }));
 
     // 新しい注文を作成して $orders に追加

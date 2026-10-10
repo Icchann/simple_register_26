@@ -22,6 +22,7 @@ export type OrderRowInput = {
   id: number;
   productCode: string;
   quantity: string;
+  flavors?: string[] | undefined;
 };
 
 export type CurrentOrderState = {
@@ -179,7 +180,7 @@ export function getNormalizedCurrentOrderItems(
     (row) => row.productCode.trim() !== "" && row.quantity.trim() !== "",
   );
 
-  // itemIdごとに数量を集計
+  // itemId + 味ごとに数量を集計
   const itemMap = new Map<string, { item: typeof Item.infer & { itemNumber: ItemNumber }; totalAmount: number }>();
 
   for (const row of filledRows) {
@@ -190,8 +191,8 @@ export function getNormalizedCurrentOrderItems(
       continue;
 
     const itemNumber = itemNumberResult.value;
-    const item = findItemByNumber(itemNumber);
-    if (!item)
+    const baseItem = findItemByNumber(itemNumber);
+    if (!baseItem)
       continue;
 
     const quantityResult = wrapValidation(
@@ -202,11 +203,26 @@ export function getNormalizedCurrentOrderItems(
 
     const quantity = Number(quantityResult.value);
 
-    const existing = itemMap.get(item.id);
+    // 味の正規化: 重複除去（2回同じ味を選んだ場合は1つに）、最大2つ
+    const normalizedFlavors = row.flavors && row.flavors.length > 0
+      ? Array.from(new Set(row.flavors)).slice(0, 2)
+      : undefined;
+
+    const item: typeof Item.infer & { itemNumber: ItemNumber } = {
+      ...baseItem,
+      ...(normalizedFlavors && normalizedFlavors.length > 0 ? { flavors: normalizedFlavors } : {}),
+    };
+
+    const flavorKey = normalizedFlavors && normalizedFlavors.length > 0
+      ? [...normalizedFlavors].sort().join(",")
+      : "";
+    const mapKey = `${item.id}:${flavorKey}`;
+
+    const existing = itemMap.get(mapKey);
     if (existing) {
       existing.totalAmount += quantity;
     } else {
-      itemMap.set(item.id, { item, totalAmount: quantity });
+      itemMap.set(mapKey, { item, totalAmount: quantity });
     }
   }
 
@@ -268,4 +284,23 @@ export function validateExtraPortion(
   }
 
   return ok(undefined);
+}
+
+export type OrderValidationError
+  = | ExtraPortionError
+    | "FLAVOR_COUNT_EXCEEDED";
+
+/**
+ * 注文商品の整合性を検証する（味の上限2種、および団子と増量の比率）
+ */
+export function validateOrderItems(
+  items = $normalizedCurrentOrderItems.get(),
+): Result<void, OrderValidationError> {
+  for (const item of items) {
+    if (item.flavors && item.flavors.length > 2) {
+      return err("FLAVOR_COUNT_EXCEEDED");
+    }
+  }
+
+  return validateExtraPortion(items);
 }

@@ -49,6 +49,9 @@ export type Status
       }
       | {
         type: "EXTRA_PORTION_EXCEEDED";
+      }
+      | {
+        type: "FLAVOR_COUNT_EXCEEDED";
       };
   }
   | {

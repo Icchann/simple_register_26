@@ -6,11 +6,13 @@ import { styled as p } from "panda/jsx";
 import { createRef, useEffect, useMemo, useRef, useState } from "react";
 
 import { Table } from "@/components/atomic/Table";
+import { DangoFlavorDialog } from "@/components/overlays/DangoFlavorDialog";
 import { wrapValidation } from "@/lib/arktype";
 import {
   focusReceiptInput,
   registerOrderFocusHelpers,
 } from "@/lib/focus-manager";
+import { ItemImpl } from "@/lib/item";
 import {
   $currentOrder,
   $discountCode,
@@ -20,7 +22,7 @@ import {
   findDiscountByNumber,
   findItemByNumber,
   updateOrderRows,
-  validateExtraPortion,
+  validateOrderItems,
 } from "@/lib/stores/current-order";
 import { $orderPhase } from "@/lib/stores/phase";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -48,6 +50,13 @@ export function OrderTable(): ReactElement {
   const orderPhase = useStore($orderPhase);
   const isActive = orderPhase === "SELECT_ITEMS";
 
+  const [flavorDialogState, setFlavorDialogState] = useState<{
+    isOpen: boolean;
+    rowId: number;
+    initialFlavor?: string | undefined;
+    displayIndex: number;
+    isTab: boolean;
+  }>({ isOpen: false, rowId: -1, displayIndex: 0, isTab: false });
   const discountInfo = useMemo(() => {
     if (!discountCode || discountCode.trim() === "") {
       return null;
@@ -241,12 +250,12 @@ export function OrderTable(): ReactElement {
               return;
             }
 
-            // 団子と増量の数量整合性を検証
-            const extraPortionResult = validateExtraPortion();
-            if (extraPortionResult.isErr()) {
+            // 団子と増量、および味の数量整合性を検証
+            const validationResult = validateOrderItems();
+            if (validationResult.isErr()) {
               setStatusWithTimeout({
                 type: "INVALID_VALUE",
-                detail: { type: extraPortionResult.error },
+                detail: { type: validationResult.error },
                 receiptNumber: $currentOrder.get().receiptNumber,
               });
               return;
@@ -291,6 +300,21 @@ export function OrderTable(): ReactElement {
                 detail: { type: "ITEM_NUMBER", itemNumber: currentValue },
               },
             );
+            return;
+          }
+          const isDango = ItemImpl(item).getGroup()?.name === "だんご";
+          const isExtraPortion = item.name === "増量";
+
+          if (isDango && !isExtraPortion) {
+            const initialFlavor = item.name === "だんご" ? undefined : item.name;
+            event.preventDefault();
+            setFlavorDialogState({
+              isOpen: true,
+              rowId: row.id,
+              initialFlavor,
+              displayIndex,
+              isTab: event.key === "Tab",
+            });
             return;
           }
         }
@@ -408,46 +432,103 @@ export function OrderTable(): ReactElement {
       }, 0);
     }
   };
+  const handleFlavorConfirm = (rowId: number, flavors: string[], displayIndex: number, isTab: boolean): void => {
+    setFlavorDialogState((prev) => ({ ...prev, isOpen: false }));
+
+    updateOrderRows((previousRows) => {
+      const index = previousRows.findIndex((candidate) => candidate.id === rowId);
+      if (index === -1)
+        return previousRows;
+
+      const nextRows = [...previousRows];
+      const targetRow = nextRows[index];
+      if (!targetRow)
+        return previousRows;
+
+      nextRows[index] = {
+        ...targetRow,
+        flavors,
+        quantity: targetRow.quantity.trim() === "" ? "1" : targetRow.quantity,
+      };
+      return nextRows;
+    });
+
+    const targetIndex = rowIndexMap.get(rowId);
+    if (isTab) {
+      setPendingFocusField("quantity");
+      setPendingFocusIndex(displayIndex);
+    } else {
+      if (targetIndex != null && targetIndex === rows.length - 1) {
+        appendOrderRow();
+      }
+      setPendingFocusField("productCode");
+      setPendingFocusIndex(displayIndex + 1);
+    }
+  };
+
+  const handleFlavorCancel = (): void => {
+    const { rowId, initialFlavor, displayIndex, isTab } = flavorDialogState;
+    setFlavorDialogState((prev) => ({ ...prev, isOpen: false }));
+
+    if (initialFlavor != null && initialFlavor !== "") {
+      handleFlavorConfirm(rowId, [initialFlavor], displayIndex, isTab);
+    } else {
+      setPendingFocusField("productCode");
+      setPendingFocusIndex(displayIndex);
+    }
+  };
 
   return (
-    <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} tableLayout="fixed" w="full">
-      <Table.head>
-        <p.tr>
-          <p.th w="10" whiteSpace="nowrap">#</p.th>
-          <p.th w="20" whiteSpace="nowrap">商品番号</p.th>
-          <p.th textAlign="left" w="stretch" whiteSpace="nowrap">商品名</p.th>
-          <p.th w="12" whiteSpace="nowrap" />
-          <p.th w="16" whiteSpace="nowrap">個数</p.th>
-          <p.th w="20" whiteSpace="nowrap">
-            割引&ensp;
-            <p.span color="gray.500">[円]</p.span>
-          </p.th>
-          <p.th w="16" whiteSpace="nowrap">小計</p.th>
-        </p.tr>
-      </Table.head>
-      <Table.body>
-        {displayRows.map((row, index) => (
-          <OrderTableRow
-            disabled={!isActive}
-            discountAmount={getDiscountAmountForRow(row.productCode) * Number.parseInt(row.quantity ?? "1", 10)}
-            index={index + 1}
-            key={row.id}
-            onChange={(field: KeyField, value: string) => {
-              handleChange(row.id, field, value);
-            }}
-            onFocus={(field: KeyField) => {
-              handleFocus(row.id, field);
-            }}
-            onKeyDown={(field: KeyField, event: React.KeyboardEvent<HTMLInputElement>) => {
-              handleKeyDown(row, index, field, event);
-            }}
-            productCode={row.productCode}
-            productCodeRef={rowRefs[index]?.productCode}
-            quantity={row.quantity}
-            quantityRef={rowRefs[index]?.quantity}
-          />
-        ))}
-      </Table.body>
-    </p.table>
+    <>
+      <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} tableLayout="fixed" w="full">
+        <Table.head>
+          <p.tr>
+            <p.th w="10" whiteSpace="nowrap">#</p.th>
+            <p.th w="20" whiteSpace="nowrap">商品番号</p.th>
+            <p.th textAlign="left" w="stretch" whiteSpace="nowrap">商品名</p.th>
+            <p.th w="12" whiteSpace="nowrap" />
+            <p.th w="16" whiteSpace="nowrap">個数</p.th>
+            <p.th w="20" whiteSpace="nowrap">
+              割引&ensp;
+              <p.span color="gray.500">[円]</p.span>
+            </p.th>
+            <p.th w="16" whiteSpace="nowrap">小計</p.th>
+          </p.tr>
+        </Table.head>
+        <Table.body>
+          {displayRows.map((row, index) => (
+            <OrderTableRow
+              disabled={!isActive}
+              discountAmount={getDiscountAmountForRow(row.productCode) * Number.parseInt(row.quantity ?? "1", 10)}
+              flavors={row.flavors}
+              index={index + 1}
+              key={row.id}
+              onChange={(field: KeyField, value: string) => {
+                handleChange(row.id, field, value);
+              }}
+              onFocus={(field: KeyField) => {
+                handleFocus(row.id, field);
+              }}
+              onKeyDown={(field: KeyField, event: React.KeyboardEvent<HTMLInputElement>) => {
+                handleKeyDown(row, index, field, event);
+              }}
+              productCode={row.productCode}
+              productCodeRef={rowRefs[index]?.productCode}
+              quantity={row.quantity}
+              quantityRef={rowRefs[index]?.quantity}
+            />
+          ))}
+        </Table.body>
+      </p.table>
+      <DangoFlavorDialog
+        initialFlavor={flavorDialogState.initialFlavor}
+        isOpen={flavorDialogState.isOpen}
+        key={flavorDialogState.isOpen ? `flavor-${flavorDialogState.rowId}-${flavorDialogState.initialFlavor ?? "none"}` : "closed"}
+        onClose={handleFlavorCancel}
+        onConfirm={(flavors) => {
+          handleFlavorConfirm(flavorDialogState.rowId, flavors, flavorDialogState.displayIndex, flavorDialogState.isTab);
+        }}
+      />
+    </>
   );
 }

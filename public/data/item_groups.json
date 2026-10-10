@@ -4,6 +4,11 @@
     "name": "だんご",
     "children": [
       {
+        "id": "au4a792p5qrb6jiigytlte17",
+        "name": "だんご",
+        "price": 150
+      },
+      {
         "id": "oqlepx24xm8ktgt8nrx9tpje",
         "name": "きなこ",
         "price": 150

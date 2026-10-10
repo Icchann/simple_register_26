@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import type { ItemNumber } from "@/types/item";
 import type { OmitStrict } from "@/types/utils";
 import { useStore } from "@nanostores/react";
-import { styled as p } from "panda/jsx";
+import { HStack, styled as p } from "panda/jsx";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { match, P } from "ts-pattern";
 import { Expanded } from "@/components/atomic/Expanded";
@@ -10,7 +10,7 @@ import { Table } from "@/components/atomic/Table";
 import { OrderStatusLabel } from "@/components/OrderStatusLabel";
 import { wrapValidation } from "@/lib/arktype";
 import { ItemImpl } from "@/lib/item";
-import { OrderStatusImpl, ReceiptNumberImpl } from "@/lib/order";
+import { DangoFlavorImpl, OrderStatusImpl, ReceiptNumberImpl } from "@/lib/order";
 import { $currentOrder, $depositAmount, $discountCode, $normalizedCurrentOrderItems, findDiscountByNumber } from "@/lib/stores/current-order";
 import { $items } from "@/lib/stores/items";
 import { $lastConfirmedOrderId, $lastStatusChangedReceiptNumber, $orders } from "@/lib/stores/orders";
@@ -44,12 +44,42 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
               : "--"}
           </Table.ItemNumber>
           <Table.ItemName overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
-            {
-              match(ItemImpl(item).getGroup()?.name)
-                .with(P.nullish, () => "")
-                .otherwise((name) => `${name}/`)
-            }
-            {item.name}
+            {item.flavors && item.flavors.length > 0
+              ? (
+                  <HStack alignItems="center" flexWrap="nowrap" gap="1">
+                    <p.span color="gray.500" fontSize="[11px]">
+                      だんご
+                    </p.span>
+                    {item.flavors.map((flavor) => {
+                      const color = DangoFlavorImpl(flavor).toColor();
+                      return (
+                        <p.span
+                          bg={color.bg}
+                          borderColor={color.borderColor}
+                          borderRadius="sm"
+                          borderWidth="1px"
+                          color={color.color}
+                          fontSize="xs"
+                          fontWeight="bold"
+                          key={flavor}
+                          px="1"
+                          py="0.5"
+                          whiteSpace="nowrap"
+                        >
+                          {flavor}
+                        </p.span>
+                      );
+                    })}
+                  </HStack>
+                )
+              : (
+                  <>
+                    {match(ItemImpl(item).getGroup()?.name)
+                      .with(P.nullish, () => "")
+                      .otherwise((name) => `${name}/`)}
+                    {item.name}
+                  </>
+                )}
           </Table.ItemName>
           <Table.ItemPrice whiteSpace="nowrap">{item.price}</Table.ItemPrice>
           <Table.ItemAmount whiteSpace="nowrap">{item.amount}</Table.ItemAmount>

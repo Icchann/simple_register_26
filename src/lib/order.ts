@@ -48,3 +48,23 @@ export function ReceiptNumberImpl(receiptNumber: Nullable<number>) {
     },
   };
 }
+
+export const DANGO_FLAVORS = [
+  { key: "1", name: "きなこ", code: "01" },
+  { key: "2", name: "みたらし", code: "02" },
+  { key: "3", name: "あんこ", code: "03" },
+  { key: "4", name: "のり醤油", code: "04" },
+] as const;
+
+export type DangoFlavorName = typeof DANGO_FLAVORS[number]["name"];
+
+export function DangoFlavorImpl(flavor: string) {
+  return {
+    toColor: () => match(flavor)
+      .with("きなこ", () => ({ bg: "amber.100", borderColor: "amber.300", color: "amber.900" }))
+      .with("みたらし", () => ({ bg: "orange.100", borderColor: "orange.300", color: "orange.900" }))
+      .with("あんこ", () => ({ bg: "purple.100", borderColor: "purple.300", color: "purple.900" }))
+      .with("のり醤油", () => ({ bg: "emerald.100", borderColor: "emerald.300", color: "emerald.900" }))
+      .otherwise(() => ({ bg: "gray.100", borderColor: "gray.300", color: "gray.800" })),
+  };
+}

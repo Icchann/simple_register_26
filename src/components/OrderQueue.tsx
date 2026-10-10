@@ -3,7 +3,7 @@ import type { ItemNumber } from "@/types/item";
 import type { OmitStrict } from "@/types/utils";
 import { useStore } from "@nanostores/react";
 import { sva } from "panda/css";
-import { styled as p } from "panda/jsx";
+import { HStack, styled as p } from "panda/jsx";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { match, P } from "ts-pattern";
 import { Expanded } from "@/components/atomic/Expanded";
@@ -11,7 +11,7 @@ import { Table } from "@/components/atomic/Table";
 import { OrderStatusLabel } from "@/components/OrderStatusLabel";
 import { wrapValidation } from "@/lib/arktype";
 import { ItemImpl } from "@/lib/item";
-import { OrderStatusImpl, ReceiptNumberImpl } from "@/lib/order";
+import { DangoFlavorImpl, OrderStatusImpl, ReceiptNumberImpl } from "@/lib/order";
 import {
   $currentOrder,
   $depositAmount,
@@ -253,10 +253,42 @@ const OrderQueueRow = memo(
                   </p.div>
                 )}
                 <p.div className={styles.itemName}>
-                  {match(ItemImpl(item).getGroup()?.name)
-                    .with(P.nullish, () => "")
-                    .otherwise((name) => `${name}/`)}
-                  {item.name}
+                  {item.flavors && item.flavors.length > 0
+                    ? (
+                        <HStack alignItems="center" flexWrap="wrap" gap="1">
+                          <p.span color="gray.500" fontSize="[11px]">
+                            だんご
+                          </p.span>
+                          {item.flavors.map((flavor) => {
+                            const color = DangoFlavorImpl(flavor).toColor();
+                            return (
+                              <p.span
+                                bg={color.bg}
+                                borderColor={color.borderColor}
+                                borderRadius="sm"
+                                borderWidth="1px"
+                                color={color.color}
+                                fontSize={size === "large" ? "2xl" : "sm"}
+                                fontWeight="bold"
+                                key={flavor}
+                                px="1.5"
+                                py="0.5"
+                                whiteSpace="nowrap"
+                              >
+                                {flavor}
+                              </p.span>
+                            );
+                          })}
+                        </HStack>
+                      )
+                    : (
+                        <>
+                          {match(ItemImpl(item).getGroup()?.name)
+                            .with(P.nullish, () => "")
+                            .otherwise((name) => `${name}/`)}
+                          {item.name}
+                        </>
+                      )}
                 </p.div>
                 <p.div className={styles.itemPrice}>{item.price}</p.div>
                 <p.div className={styles.itemAmount}>{item.amount}</p.div>

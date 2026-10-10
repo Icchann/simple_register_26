@@ -18,10 +18,12 @@ function ItemName(
   {
     itemWithItemNumber,
     isBlank,
+    flavors,
   }:
   {
     itemWithItemNumber: Nullable<ItemWithItemNumber>;
     isBlank: boolean;
+    flavors?: string[] | undefined;
   },
 ): ReactElement {
   const phase = useStore($orderPhase);
@@ -53,10 +55,12 @@ function ItemName(
       whiteSpace="nowrap"
     >
       {
-        match(ItemImpl(itemWithItemNumber).getGroup()?.name)
-          .with(P.nullish, () => "")
-          .otherwise((name) => `${name}/`)
-          + itemWithItemNumber.name
+        flavors && flavors.length > 0
+          ? `だんご (${flavors.join(" + ")})`
+          : match(ItemImpl(itemWithItemNumber).getGroup()?.name)
+            .with(P.nullish, () => "")
+            .otherwise((name) => `${name}/`)
+            + itemWithItemNumber.name
       }
     </p.p>
   );
@@ -66,6 +70,7 @@ export const OrderTableRow = memo((
   props: {
     disabled: boolean;
     discountAmount: number;
+    flavors?: string[] | undefined;
     index: number;
     productCode: string;
     quantity: string;
@@ -118,6 +123,7 @@ export const OrderTableRow = memo((
       </Table.cell>
       <Table.cell fontFamily="sans" whiteSpace="nowrap">
         <ItemName
+          flavors={props.flavors}
           isBlank={props.productCode.trim() === "" && props.quantity.trim() === ""}
           itemWithItemNumber={itemInfo}
         />

@@ -202,6 +202,14 @@ function Status(): ReactElement {
               </p.p>
             </>
           ))
+          .with({ type: "FLAVOR_COUNT_EXCEEDED" }, () => (
+            <>
+              <IconMaterialSymbolsError />
+              <p.p>
+                だんごの味は2種類までしか選べません
+              </p.p>
+            </>
+          ))
           .exhaustive()}
       </HStack>
     ))
