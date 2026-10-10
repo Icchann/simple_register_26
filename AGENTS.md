@@ -124,12 +124,13 @@ function sanitizeNumericString(value: string): string {
 - 大きめの UI（例: `PickupMonitor`）は `sva` でスロット化しつつ、状態はストアから読む
 - ドメイン処理（集計/正規化）は `lib/` に寄せ、コンポーネントは呼び出すだけ
 - メイン画面の割引入力（`src/routes/main._index/active-area/AmountSection.tsx`）では、`$discounts` から割引番号と名称を取得して一覧表示し、未入力時は「未入力: 割引なし」の案内を表示します。
-- メイン画面レイアウト（`src/routes/main._index/`）では、`route.tsx` のグリッド行を `repeat(5, minmax(0, 1fr)) auto` とし、`StatusBar` を最下部に固定しています。商品登録行（`OrderTable`）は `MiddleArea`（`overflowY="auto"`, `minH="0"`）内でスクロールし、ヘッダを固定表示します。また、解像度不足による要素重なりを防ぐため、Tauri ウィンドウの最小サイズ（1024x700）および `StatusBar` での解像度バリデーション警告を設けています。
+- メイン画面レイアウト（`src/routes/main._index/`）では、`route.tsx` のグリッド行を `repeat(5, minmax(0, 1fr)) auto` とし、`StatusBar` を最下部に固定しています。メニュー（`Information`）や会計欄（`AmountSection`）はスクロールさせずに全項目を常時視認可能とし、スクロールは注文が増える箇所（注文伝票 `OrderTable`、注文履歴 `OrderQueue`）に限定しています。また、文字の縦改行を防ぐため `whiteSpace: nowrap` と `clamp()` による流動的フォントサイズを採用しています。
 ## エラーハンドリングの約束
 
 - ユーザー入力/外部入出力 → ArkType + `wrapValidation` → `Result`
 - `Result.isErr()` の場合は UI で控えめな表示（トーストやラベル）。ログは `console` レベルで十分（ローカル完結のため）
 - 例外を投げるのは、どうしても処理継続不能なプログラマブルエラーのみ
+- 調理完了・受取完了時に対象ステータス（調理待ち・受取待ち）の注文が存在しない場合は、範囲外エラー（`RECEIPT_NUMBER`）ではなく専用の `RECEIPT_NOT_FOUND` エラーをストアから通知し、`StatusBar` で「受付番号 {number} は受取待ち/調理待ちに存在しません」と理由を明示します。
 
 ## パフォーマンスの小技
 

@@ -110,6 +110,26 @@ function Status(): ReactElement {
               </p.p>
             </>
           ))
+          .with({ type: "RECEIPT_NOT_FOUND" }, ({ receiptNumber: notFoundReceiptNumber, status: orderStatus }) => {
+            const statusLabel = match(orderStatus)
+              .with("WAITING_COOKING", () => "調理待ち")
+              .with("WAITING_PICKUP", () => "受取待ち")
+              .otherwise(() => "受取待ち");
+            return (
+              <>
+                <IconMaterialSymbolsIndeterminateQuestionBox />
+                <p.p>
+                  受付番号
+                  {" "}
+                  <p.code>{notFoundReceiptNumber}</p.code>
+                  {" "}
+                  は
+                  {statusLabel}
+                  に存在しません
+                </p.p>
+              </>
+            );
+          })
           .with({ type: "ITEM_EMPTY" }, () => (
             <>
               <IconMaterialSymbolsError />

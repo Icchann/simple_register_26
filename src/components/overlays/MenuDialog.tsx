@@ -72,10 +72,19 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
 
       onClose();
     } else {
+      const sourceStatus = match(targetStatus)
+        .with("WAITING_PICKUP", () => "WAITING_COOKING" as const)
+        .with("PICKED_UP", () => "WAITING_PICKUP" as const)
+        .otherwise(() => undefined);
+
       setStatusWithTimeout(
         {
           type: "INVALID_VALUE",
-          detail: { type: "RECEIPT_NUMBER", receiptNumber },
+          detail: {
+            type: "RECEIPT_NOT_FOUND",
+            receiptNumber,
+            ...(sourceStatus ? { status: sourceStatus } : {}),
+          },
           receiptNumber: null,
         },
         3000,

@@ -184,16 +184,20 @@ match(status)
 
 - モニタ3枚に main, order-queue, pickup-monitor をそれぞれ出力するには？
 
-  以下のいずれかの方法で行えます。状態は localStorage（nanostores）で同期されるため、どの画面で行った操作も即座に全画面へ反映されます。
+  もとのコードのまま変更を加えずに出力する方法、および Windows Tauri 上で出力する方法は以下のとおりです（状態は localStorage で同期されるため、どの画面で行った操作も即座に全画面へ反映されます）。
 
-  1. **ブラウザを使用する場合（推奨・最も簡単）**:
-     `bun run dev`（またはビルド後に `bun run preview`）で起動し、ブラウザで以下の各画面を開いてそれぞれのモニタへ配置・全画面表示します。
-     - モニタ1（レジ）: `http://localhost:1420/main`
-     - モニタ2（調理キュー）: `http://localhost:1420/order-queue`
-     - モニタ3（受取モニター）: `http://localhost:1420/pickup-monitor`
-  2. **Tauri（デスクトップアプリ）で複数ウィンドウを開く場合**:
-     `src-tauri/tauri.conf.json` の `app.windows` に各画面のウィンドウ定義を追加して `bun run tauri dev` で起動し、各ウィンドウをそれぞれのモニタへ配置します。
+  1. **Windows の PowerShell 7.6.6 からブラウザで開く場合（元のコードのまま）**:
+     ```powershell
+     # 1. 開発サーバーを起動
+     bun run dev
 
+     # 2. 別のターミナルから3画面をブラウザで開いて各モニタへ配置
+     Start-Process "http://localhost:1420/main"
+     Start-Process "http://localhost:1420/order-queue"
+     Start-Process "http://localhost:1420/pickup-monitor"
+     ```
+  2. **Windows の Tauri（デスクトップアプリ）で起動する場合**:
+     Windows の Tauri で起動した際は、初期メニュー画面（`/`）に「3画面を同時に開く」ボタンが表示されます（`!DANGER!: RESET ORDER` も保持）。ボタンを押すと `main`, `order-queue`, `pickup-monitor` の3画面が同時に別ウィンドウとして立ち上がります。各ウィンドウをドラッグしてそれぞれのモニタへ配置してください。
 - Windows のデスクトップアプリ（Tauri）でレイアウトが重なって崩れます
 
   本アプリは 1280×720 以上の解像度を想定して設計されています。`tauri.conf.json` のウィンドウサイズを 1280×800（最小 1024×700）に制限し、画面解像度が不足している場合は最下部ステータスバーに警告が表示されます。ウィンドウを最大化または全画面表示（F11）にしてご利用ください。

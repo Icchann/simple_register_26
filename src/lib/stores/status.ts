@@ -20,6 +20,11 @@ export type Status
         receiptNumber: number;
       }
       | {
+        type: "RECEIPT_NOT_FOUND";
+        receiptNumber: number;
+        status?: "WAITING_COOKING" | "WAITING_PICKUP" | undefined;
+      }
+      | {
         type: "ITEM_EMPTY";
       }
       | {
