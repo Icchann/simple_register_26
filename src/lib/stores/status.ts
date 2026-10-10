@@ -25,6 +25,11 @@ export type Status
         status?: "WAITING_COOKING" | "WAITING_PICKUP" | undefined;
       }
       | {
+        type: "RECEIPT_ALREADY_IN_USE";
+        receiptNumber: number;
+        status: "WAITING_COOKING" | "WAITING_PICKUP";
+      }
+      | {
         type: "ITEM_EMPTY";
       }
       | {

@@ -84,13 +84,12 @@ export function ActiveArea(): ReactElement {
             focusReceiptInput();
           });
         } else {
-          // 別のオーバーレイが開いている場合は一旦閉じてから新しいものを開く
-          if (currentOverlayType !== null) {
-            menuDialogRef.current?.close();
-            closeOverlay();
-          }
+          // 別のオーバーレイへの切り替え時は close() を呼ばず（focusReceiptInputの発火を防ぐ）、
+          // 開いたまま中身だけを切り替える
           showOverlay(overlayType);
-          menuDialogRef.current?.showModal();
+          if (currentOverlayType === null) {
+            menuDialogRef.current?.showModal();
+          }
         }
       }
     };

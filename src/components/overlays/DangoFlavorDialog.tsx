@@ -109,14 +109,8 @@ export function DangoFlavorDialog({
         return;
       }
 
-      // 「味なし」の場合は単一確定
-      if (chosenFlavor === "味なし") {
-        onConfirm(["味なし"]);
-        return;
-      }
-
       if (firstFlavor == null) {
-        // 1つ目の味を選択
+        // 1つ目の味を選択 (味なし または 各種味)
         setFirstFlavor(chosenFlavor);
       } else {
         // 2つ目の味を選択して即確定（同じ味なら1種、異なるなら2種）
@@ -135,8 +129,8 @@ export function DangoFlavorDialog({
     return <></>;
 
   const promptMessage = firstFlavor == null
-    ? "味を選んでください (テンキー 1〜4: 味選択 / 0: 味なし / [BS] 戻る)"
-    : "もう一つの味を選んでください (1味の場合はEnter / [BS] 戻る)";
+    ? "1つ目の味を選んでください (0: 味なし / 1〜4: 各種味 / [BS] 戻る)"
+    : "2つ目の味を選んでください (1味のみで確定は Enter / 0〜4: 味選択 / [BS] 戻る)";
   return (
     <p.div
       bottom="0"
@@ -266,10 +260,6 @@ export function DangoFlavorDialog({
                 key={flavor.key}
                 onClick={() => {
                   if (isSoldOut) {
-                    return;
-                  }
-                  if (flavor.name === "味なし") {
-                    onConfirm(["味なし"]);
                     return;
                   }
                   if (firstFlavor == null) {

@@ -137,4 +137,11 @@ describe("DANGO_FLAVORS and 味なし", () => {
     const color = DangoFlavorImpl("味なし").toColor();
     expect(color.bg).toBe("gray.100");
   });
+
+  it("supports pairing 味なし with other flavors (half unflavored)", () => {
+    const halfUnflavored = ["きなこ", "味なし"];
+    expect(halfUnflavored).toHaveLength(2);
+    expect(halfUnflavored).toContain("味なし");
+    expect(halfUnflavored).toContain("きなこ");
+  });
 });

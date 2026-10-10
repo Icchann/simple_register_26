@@ -13,6 +13,7 @@ import {
   registerOrderFocusHelpers,
 } from "@/lib/focus-manager";
 import { ItemImpl } from "@/lib/item";
+import { DANGO_FLAVORS } from "@/lib/order";
 import {
   $currentOrder,
   $discountCode,
@@ -497,8 +498,19 @@ export function OrderTable(): ReactElement {
       if (!targetRow)
         return previousRows;
 
+      let syncedProductCode = targetRow.productCode;
+      if (flavors.length === 1) {
+        const matched = DANGO_FLAVORS.find((f) => f.name === flavors[0]);
+        if (matched) {
+          syncedProductCode = matched.code;
+        }
+      } else if (flavors.length > 1) {
+        syncedProductCode = "00";
+      }
+
       nextRows[index] = {
         ...targetRow,
+        productCode: syncedProductCode,
         flavors,
         quantity: targetRow.quantity.trim() === "" ? "1" : targetRow.quantity,
       };

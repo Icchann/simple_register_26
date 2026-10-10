@@ -246,7 +246,31 @@ export function Information(): ReactElement {
                     },
                   );
                   return;
-                } // orderId を生成して currentOrder に保存 (Enter時のみ)
+                }
+
+                // 調理待ちまたは受取待ちにすでに存在する受付番号の重複登録を防止
+                const activeOrders = orders.filter(
+                  (o) => o.status === "WAITING_COOKING" || o.status === "WAITING_PICKUP",
+                );
+                const existingOrder = activeOrders.find((o) => o.receiptNumber === validatedReceiptNumber);
+                if (existingOrder) {
+                  event.currentTarget.select();
+                  const inUseStatus = existingOrder.status === "WAITING_COOKING" ? "WAITING_COOKING" : "WAITING_PICKUP";
+                  setStatusWithTimeout(
+                    {
+                      type: "INVALID_VALUE",
+                      detail: {
+                        type: "RECEIPT_ALREADY_IN_USE",
+                        receiptNumber: validatedReceiptNumber,
+                        status: inUseStatus,
+                      },
+                      receiptNumber: null,
+                    },
+                  );
+                  return;
+                }
+
+                // orderId を生成して currentOrder に保存 (Enter時のみ)
                 // $orders への追加は注文確定時 (AmountSection.handleConfirm) まで待つ
                 const now = new Date().toISOString();
                 const orderId = createId();

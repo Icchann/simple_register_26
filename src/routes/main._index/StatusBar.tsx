@@ -130,6 +130,23 @@ function Status(): ReactElement {
               </>
             );
           })
+          .with({ type: "RECEIPT_ALREADY_IN_USE" }, ({ receiptNumber: inUseReceiptNumber, status: inUseStatus }) => {
+            const statusLabel = inUseStatus === "WAITING_COOKING" ? "調理待ち" : "受取待ち";
+            return (
+              <>
+                <IconMaterialSymbolsError />
+                <p.p>
+                  受付番号
+                  {" "}
+                  <p.code>{inUseReceiptNumber}</p.code>
+                  {" "}
+                  は現在
+                  {statusLabel}
+                  で使用中です
+                </p.p>
+              </>
+            );
+          })
           .with({ type: "ITEM_EMPTY" }, () => (
             <>
               <IconMaterialSymbolsError />

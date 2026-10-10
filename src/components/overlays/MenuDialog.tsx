@@ -328,6 +328,7 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
                 受付番号を入力してください
               </p.p>
               <ReceiptNumberInput
+                key={overlayType}
                 onConfirm={handleConfirm}
                 onInvalidReceiptNumber={handleInvalidReceiptNumber}
               />

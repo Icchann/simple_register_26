@@ -35,10 +35,10 @@ export function Dialog({ ref, children, onClose, fullScreen = false }: DialogPro
     <p.div
       bottom="0"
       left="0"
-      position="absolute"
+      position={fullScreen ? "fixed" : "absolute"}
       right="0"
       top="0"
-      zIndex="50"
+      zIndex={fullScreen ? "9999" : "50"}
     >
       {/* Overlay */}
       <p.div
@@ -65,11 +65,11 @@ export function Dialog({ ref, children, onClose, fullScreen = false }: DialogPro
         maxH={fullScreen ? "full" : "calc(100% - 2rem)"}
         maxW={fullScreen ? "full" : "calc(100% - 2rem)"}
         overflow={fullScreen ? "hidden" : "auto"}
-        position="absolute"
+        position={fullScreen ? "fixed" : "absolute"}
         top="0"
         transform={fullScreen ? "none" : "translate(1rem, 1rem)"}
         w="full"
-        zIndex="modal"
+        zIndex={fullScreen ? "9999" : "modal"}
       >
         {children}
       </p.div>
