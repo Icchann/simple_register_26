@@ -6,6 +6,7 @@ import { useImperativeHandle, useState } from "react";
 export type DialogProps = {
   children: ReactNode;
   onClose?: () => void;
+  fullScreen?: boolean;
 };
 
 export type DialogRef = {
@@ -13,7 +14,7 @@ export type DialogRef = {
   close: () => void;
 };
 
-export function Dialog({ ref, children, onClose }: DialogProps & { ref?: React.RefObject<DialogRef | null> }): ReactElement {
+export function Dialog({ ref, children, onClose, fullScreen = false }: DialogProps & { ref?: React.RefObject<DialogRef | null> }): ReactElement {
   const [isOpen, setIsOpen] = useState(false);
 
   useImperativeHandle(ref, (): DialogRef => ({
@@ -61,12 +62,12 @@ export function Dialog({ ref, children, onClose }: DialogProps & { ref?: React.R
         flexDir="column"
         h="full"
         left="0"
-        maxH="calc(100% - 2rem)"
-        maxW="calc(100% - 2rem)"
-        overflow="auto"
+        maxH={fullScreen ? "full" : "calc(100% - 2rem)"}
+        maxW={fullScreen ? "full" : "calc(100% - 2rem)"}
+        overflow={fullScreen ? "hidden" : "auto"}
         position="absolute"
         top="0"
-        transform="translate(1rem, 1rem)"
+        transform={fullScreen ? "none" : "translate(1rem, 1rem)"}
         w="full"
         zIndex="modal"
       >

@@ -127,6 +127,192 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
 
   const showReceiptNumberInput = overlayType === "COOKING_COMPLETE" || overlayType === "PICKUP_COMPLETE";
 
+  if (overlayType === "ITEM_EDIT") {
+    return (
+      <VStack className={bgClassName} gap="3" h="full" justifyContent="space-between" p="4" w="full">
+        {/* ヘッダー */}
+        <HStack justifyContent="space-between" w="full">
+          <p.h2 fontSize="xl" fontWeight="bold">
+            {title}
+            {" "}
+            (売り切れ切り替え)
+          </p.h2>
+          <HStack gap="3">
+            <p.span color="gray.800" fontSize="xs" fontWeight="bold">
+              もう一度 [+] キーを押すとレジに戻ります
+            </p.span>
+            <Button onClick={onClose} size="sm">
+              閉じる
+            </Button>
+          </HStack>
+        </HStack>
+
+        {/* 番号入力エリア */}
+        <HStack
+          bg="white"
+          borderColor="gray.400"
+          borderRadius="md"
+          borderWidth="2px"
+          gap="3"
+          justifyContent="center"
+          py="2"
+          w="full"
+        >
+          <p.span fontSize="lg" fontWeight="bold">
+            商品番号入力:
+          </p.span>
+          <NumberInput
+            fontSize="xl"
+            fontWeight="bold"
+            h="10"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                const raw = e.currentTarget.value.trim();
+                if (raw === "") {
+                  return;
+                }
+                const val = Number.parseInt(raw, 10);
+                if (!Number.isNaN(val)) {
+                  const success = toggleItemSoldOutByNumber(val);
+                  if (success) {
+                    const itemNumberResult = wrapValidation(ItemNumber(val));
+                    const targetItem = itemNumberResult.isOk()
+                      ? findItemByNumber(itemNumberResult.value)
+                      : null;
+                    const statusLabel = targetItem?.isSoldOut === true ? "【売り切れ(✕)】" : "【販売中】";
+                    setItemEditFeedback(`商品「${targetItem?.name ?? val}」を ${statusLabel} に切り替えました`);
+                  } else {
+                    setItemEditFeedback(`商品番号「${raw}」に該当する商品はありません`);
+                  }
+                  e.currentTarget.value = "";
+                }
+              }
+            }}
+            outline={{
+              base: "2px solid",
+              _focus: "4px solid",
+            }}
+            outlineColor="black"
+            ref={itemNumberInputRef}
+            textAlign="center"
+            w="24"
+          />
+          <p.span color="gray.700" fontSize="xs" fontWeight="bold">
+            (テンキーで入力後 Enter)
+          </p.span>
+          {itemEditFeedback != null && (
+            <p.span
+              bg="blue.50"
+              borderColor="blue.400"
+              borderRadius="sm"
+              borderWidth="1px"
+              color="blue.900"
+              fontSize="xs"
+              fontWeight="bold"
+              ml="2"
+              px="2"
+              py="0.5"
+            >
+              {itemEditFeedback}
+            </p.span>
+          )}
+        </HStack>
+
+        {/* 3列商品一覧（隙間を詰めてスクロールゼロ） */}
+        <Grid gap="3" gridTemplateColumns="1fr 1fr 1fr" overflow="hidden" w="full">
+          {items.map((group) => (
+            <VStack
+              alignItems="flex-start"
+              bg="white/90"
+              borderColor="gray.400"
+              borderRadius="md"
+              borderWidth="1px"
+              gap="1"
+              key={group.id}
+              p="2"
+              w="full"
+            >
+              <p.p
+                borderBottom="1px solid"
+                borderColor="gray.300"
+                color="gray.800"
+                fontSize="xs"
+                fontWeight="bold"
+                pb="1"
+                w="full"
+              >
+                {group.name}
+              </p.p>
+              <VStack gap="1" w="full">
+                {group.children.map((child) => {
+                  const isSoldOut = child.isSoldOut === true;
+                  return (
+                    <HStack
+                      bg={isSoldOut ? "red.100" : "white"}
+                      borderColor={isSoldOut ? "red.400" : "gray.300"}
+                      borderRadius="sm"
+                      borderWidth="1px"
+                      cursor="pointer"
+                      fontSize="xs"
+                      justifyContent="space-between"
+                      key={child.id}
+                      onClick={() => {
+                        toggleItemSoldOut(child.id);
+                      }}
+                      px="2"
+                      py="1"
+                      w="full"
+                    >
+                      <HStack gap="2">
+                        <p.code
+                          bg="gray.900"
+                          borderRadius="sm"
+                          color="white"
+                          fontSize="xs"
+                          fontWeight="bold"
+                          px="1.5"
+                          py="0.5"
+                        >
+                          {child.itemNumber.toString().padStart(2, "0")}
+                        </p.code>
+                        <p.span
+                          color={isSoldOut ? "red.800" : "gray.900"}
+                          fontWeight="bold"
+                          textDecoration={isSoldOut ? "line-through" : undefined}
+                        >
+                          {child.name}
+                        </p.span>
+                      </HStack>
+                      <p.span
+                        bg={isSoldOut ? "red.600" : "green.600"}
+                        borderRadius="sm"
+                        color="white"
+                        fontSize="[11px]"
+                        fontWeight="bold"
+                        px="1.5"
+                        py="0.5"
+                      >
+                        {isSoldOut ? "✕ 売り切れ" : "販売中"}
+                      </p.span>
+                    </HStack>
+                  );
+                })}
+              </VStack>
+            </VStack>
+          ))}
+        </Grid>
+
+        {/* 操作ガイド */}
+        <HStack color="gray.800" fontSize="xs" fontWeight="medium" justifyContent="center" w="full">
+          <p.span>
+            ※ テンキーだけで操作できます: 商品番号を入力して Enter で切替、もう一度 [+] でレジに戻ります
+          </p.span>
+        </HStack>
+      </VStack>
+    );
+  }
+
   return (
     <VStack className={bgClassName} gap="4" h="full" justifyContent="center" p="6" w="full">
       <HStack gap="2">
@@ -150,162 +336,20 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
               </p.p>
             </VStack>
           )
-        : overlayType === "ITEM_EDIT"
-          ? (
-              <VStack gap="3" maxH="80vh" w="full">
-                <p.p fontSize="sm" fontWeight="medium">
-                  クリックまたは商品番号を入力して売り切れ状態（✕）を切り替えます
-                </p.p>
-                <HStack gap="2">
-                  <p.span fontSize="sm" fontWeight="bold">商品番号:</p.span>
-                  <NumberInput
-                    h="10"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const raw = e.currentTarget.value.trim();
-                        if (raw === "") {
-                          return;
-                        }
-                        const val = Number.parseInt(raw, 10);
-                        if (!Number.isNaN(val)) {
-                          const success = toggleItemSoldOutByNumber(val);
-                          if (success) {
-                            const itemNumberResult = wrapValidation(ItemNumber(val));
-                            const targetItem = itemNumberResult.isOk()
-                              ? findItemByNumber(itemNumberResult.value)
-                              : null;
-                            const statusLabel = targetItem?.isSoldOut === true ? "【売り切れ(✕)】" : "【販売中】";
-                            setItemEditFeedback(`商品「${targetItem?.name ?? val}」を ${statusLabel} に切り替えました`);
-                          } else {
-                            setItemEditFeedback(`商品番号「${raw}」に該当する商品はありません`);
-                          }
-                          e.currentTarget.value = "";
-                        }
-                      }
-                    }}
-                    outline={{
-                      base: "2px solid",
-                      _focus: "4px solid",
-                    }}
-                    outlineColor="black"
-                    ref={itemNumberInputRef}
-                    textAlign="center"
-                    w="20"
-                  />
-                  <p.span color="gray.700" fontSize="xs">
-                    (番号入力後 Enter)
-                  </p.span>
-                </HStack>
-                {itemEditFeedback != null && (
-                  <p.p
-                    bg="white"
-                    borderColor="gray.400"
-                    borderRadius="sm"
-                    borderWidth="1px"
-                    color="blue.900"
-                    fontSize="xs"
-                    fontWeight="bold"
-                    px="2"
-                    py="1"
-                    textAlign="center"
-                  >
-                    {itemEditFeedback}
-                  </p.p>
-                )}
-                <VStack
-                  bg="white/70"
-                  borderColor="gray.400"
-                  borderRadius="md"
-                  borderWidth="1px"
-                  gap="3"
-                  maxH="45vh"
-                  overflowY="auto"
-                  p="3"
-                  w="full"
-                >
-                  {items.map((group) => (
-                    <VStack alignItems="flex-start" gap="1" key={group.id} w="full">
-                      <p.p color="gray.800" fontSize="xs" fontWeight="bold">
-                        {group.name}
-                      </p.p>
-                      <Grid gap="1.5" gridTemplateColumns="repeat(2, 1fr)" w="full">
-                        {group.children.map((child) => {
-                          const isSoldOut = child.isSoldOut === true;
-                          return (
-                            <HStack
-                              bg={isSoldOut ? "red.100" : "white"}
-                              borderColor={isSoldOut ? "red.400" : "gray.300"}
-                              borderRadius="sm"
-                              borderWidth="1px"
-                              cursor="pointer"
-                              fontSize="xs"
-                              justifyContent="space-between"
-                              key={child.id}
-                              onClick={() => {
-                                toggleItemSoldOut(child.id);
-                              }}
-                              px="2"
-                              py="1.5"
-                            >
-                              <HStack gap="1.5">
-                                <p.code
-                                  bg="gray.800"
-                                  borderRadius="sm"
-                                  color="white"
-                                  fontSize="[10px]"
-                                  px="1"
-                                >
-                                  {child.itemNumber.toString().padStart(2, "0")}
-                                </p.code>
-                                <p.span
-                                  color={isSoldOut ? "red.800" : "gray.900"}
-                                  fontWeight="medium"
-                                  textDecoration={isSoldOut ? "line-through" : undefined}
-                                >
-                                  {child.name}
-                                </p.span>
-                              </HStack>
-                              <p.span
-                                bg={isSoldOut ? "red.600" : "green.600"}
-                                borderRadius="sm"
-                                color="white"
-                                fontSize="[10px]"
-                                fontWeight="bold"
-                                px="1.5"
-                                py="0.5"
-                              >
-                                {isSoldOut ? "✕ 売り切れ" : "販売中"}
-                              </p.span>
-                            </HStack>
-                          );
-                        })}
-                      </Grid>
-                    </VStack>
-                  ))}
-                </VStack>
-                <p.p color="gray.800" fontSize="sm" fontWeight="medium">
-                  もう一度同じボタンを押すと戻ります
-                </p.p>
-                <Button onClick={onClose} size="sm" w="48">
+        : (
+            <>
+              <p.p color="gray.700">
+                オーバーレイタイプ:
+                {" "}
+                {overlayType ?? "なし"}
+              </p.p>
+              <VStack gap="2" w="full">
+                <Button onClick={onClose} w="full">
                   閉じる
                 </Button>
               </VStack>
-            )
-          : (
-              <>
-                <p.p color="gray.700">
-                  オーバーレイタイプ:
-                  {" "}
-                  {overlayType ?? "なし"}
-                </p.p>
-                <VStack gap="2" w="full">
-                  <Button onClick={onClose} w="full">
-                    閉じる
-                  </Button>
-                </VStack>
-              </>
-            )}
+            </>
+          )}
     </VStack>
   );
 }

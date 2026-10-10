@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import type { DialogRef } from "@/components/atomic/Dialog";
 import type { Nullable } from "@/types/utils";
+import { useStore } from "@nanostores/react";
 import { css } from "panda/css";
 import { useEffect, useRef } from "react";
 import { match } from "ts-pattern";
@@ -48,6 +49,7 @@ export function ActiveArea(): ReactElement {
   const resetCompletedRef = useRef(false);
   const startTimeRef = useRef<number>(0);
   const menuDialogRef = useRef<DialogRef>(null);
+  const overlayType = useStore($overlayType);
 
   // テンキーでオーバーレイを表示/切り替え/閉じる
   useEffect(() => {
@@ -244,6 +246,7 @@ export function ActiveArea(): ReactElement {
       <MiddleArea />
       <RightArea />
       <Dialog
+        fullScreen={overlayType === "ITEM_EDIT"}
         onClose={() => {
           closeOverlay();
           requestAnimationFrame(() => {
