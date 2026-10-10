@@ -556,7 +556,7 @@ export function AmountSection(): ReactElement {
         ref={confirmButtonRef}
         variant="filled"
       >
-        注文確定 (. + Enter)
+        注文確定 (注文確定 + 確定)
       </Button>
     </VStack>
   );

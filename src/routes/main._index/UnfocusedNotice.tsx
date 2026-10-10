@@ -101,7 +101,7 @@ export function UnfocusedNotice(): ReactElement | null {
         py="2"
       >
         <IconMaterialSymbolsWarning />
-        <span>次項目を押してください</span>
+        <span>次項目または後退キーを押してください</span>
       </p.button>
     </p.div>
   );

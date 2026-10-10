@@ -27,8 +27,9 @@ export function DangoFlavorDialog({
   }, [dangoGroup]);
 
   const [firstFlavor, setFirstFlavor] = useState<string | null>(() => {
-    if (initialFlavor != null && !isFlavorSoldOut(initialFlavor)) {
-      return initialFlavor;
+    const candidate = initialFlavor ?? "味なし";
+    if (!isFlavorSoldOut(candidate)) {
+      return candidate;
     }
     return null;
   });
@@ -129,8 +130,8 @@ export function DangoFlavorDialog({
     return <></>;
 
   const promptMessage = firstFlavor == null
-    ? "1つ目の味を選んでください (0: 味なし / 1〜4: 各種味 / [BS] 戻る)"
-    : "2つ目の味を選んでください (1味のみで確定は Enter / 0〜4: 味選択 / [BS] 戻る)";
+    ? "1つ目の味を選んでください (0: 味なし / 1〜4: 各種味 / [後退] 戻る)"
+    : "2つ目の味を選んでください (1味のみで確定は [確定] / 0〜4: 味選択 / [後退] 戻る)";
   return (
     <p.div
       bottom="0"
@@ -306,8 +307,8 @@ export function DangoFlavorDialog({
         {/* 確定・キャンセル操作ガイド */}
         <HStack color="gray.500" fontSize="xs" justifyContent="space-between" pt="1" w="full">
           <p.span>[1〜4] 味選択 / [0] 味なし</p.span>
-          <p.span>[Enter] 1味で確定 / 次へ</p.span>
-          <p.span>[BS] 戻る / キャンセル</p.span>
+          <p.span>[確定] 1味で確定 / 次へ</p.span>
+          <p.span>[後退] 戻る / キャンセル</p.span>
         </HStack>
       </VStack>
     </p.div>

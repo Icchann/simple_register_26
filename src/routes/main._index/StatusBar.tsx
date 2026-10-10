@@ -64,7 +64,7 @@ function Status(): ReactElement {
                   {ReceiptNumberImpl(receiptNumber).toStr()}
                 </InlineReceiptNumber>
                 <IconMaterialSymbolsRestartAlt />
-                <p.p>BS を押し続けて注文をリセット...</p.p>
+                <p.p>[後退] を長押しして注文をリセット...</p.p>
               </HStack>
             </HStack>
           )

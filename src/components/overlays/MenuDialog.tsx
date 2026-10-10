@@ -139,7 +139,7 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
           </p.h2>
           <HStack gap="3">
             <p.span color="gray.800" fontSize="xs" fontWeight="bold">
-              もう一度 [+] キーを押すとレジに戻ります
+              もう一度 [商品修正] キーを押すとレジに戻ります
             </p.span>
             <Button onClick={onClose} size="sm">
               閉じる
@@ -199,7 +199,7 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
             w="24"
           />
           <p.span color="gray.700" fontSize="xs" fontWeight="bold">
-            (テンキーで入力後 Enter)
+            (番号入力後 [確定])
           </p.span>
           {itemEditFeedback != null && (
             <p.span
@@ -306,7 +306,7 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
         {/* 操作ガイド */}
         <HStack color="gray.800" fontSize="xs" fontWeight="medium" justifyContent="center" w="full">
           <p.span>
-            ※ テンキーだけで操作できます: 商品番号を入力して Enter で切替、もう一度 [+] でレジに戻ります
+            ※ テンキーだけで操作できます: 商品番号を入力して [確定] で切替、もう一度 [商品修正] でレジに戻ります
           </p.span>
         </HStack>
       </VStack>

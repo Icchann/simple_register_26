@@ -32,7 +32,7 @@ function ItemName(
 
   if (isSelectItemsPhase) {
     if (isBlank) {
-      return <p.p fontStyle="italic" whiteSpace="nowrap">Enter で割引確認へ</p.p>;
+      return <p.p fontStyle="italic" whiteSpace="nowrap">[確定] で割引確認へ</p.p>;
     }
 
     if (itemWithItemNumber == null) {

@@ -359,7 +359,7 @@ export function OrderTable(): ReactElement {
           const isExtraPortion = item.name === "増量";
 
           if (isDango && !isExtraPortion) {
-            const initialFlavor = item.name === "だんご" ? undefined : item.name;
+            const initialFlavor = item.name === "だんご" ? "味なし" : item.name;
             event.preventDefault();
             setFlavorDialogState({
               isOpen: true,

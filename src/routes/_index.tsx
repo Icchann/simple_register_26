@@ -38,6 +38,16 @@ export default function (): ReactElement {
       }
     });
   };
+  const handleResetData = (): void => {
+    // eslint-disable-next-line no-alert
+    const confirmed = window.confirm(
+      "すべての注文データや設定（localStorage）をリセットしますか？\nこの操作は取り消せません。",
+    );
+    if (confirmed) {
+      localStorage.clear();
+      location.reload();
+    }
+  };
 
   return (
     <VStack fontSize="2xl" gap="4" p="8">
@@ -59,15 +69,29 @@ export default function (): ReactElement {
               <p.a href="/pickup-monitor">pickup-monitor</p.a>
             </>
           )}
-      <p.p
-        cursor="pointer"
-        onClick={() => {
-          localStorage.clear();
-          location.reload();
+      {/* 誤操作防止のため右下に小さく配置されたデータリセットボタン */}
+      <p.button
+        _hover={{
+          bg: "red.50",
+          color: "red.700",
+          borderColor: "red.500",
         }}
+        bg="transparent"
+        borderColor="red.300"
+        borderRadius="md"
+        borderWidth="1px"
+        bottom="4"
+        color="red.600"
+        cursor="pointer"
+        fontSize="xs"
+        fontWeight="bold"
+        onClick={handleResetData}
+        p="2"
+        position="fixed"
+        right="4"
       >
         !DANGER!: RESET ORDER
-      </p.p>
+      </p.button>
     </VStack>
   );
 }
