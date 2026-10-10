@@ -9,7 +9,7 @@ import { Expanded } from "@/components/atomic/Expanded";
 import { MenuDialog } from "@/components/overlays/MenuDialog";
 import { focusReceiptInput } from "@/lib/focus-manager";
 import { $currentOrder, resetCurrentOrder } from "@/lib/stores/current-order";
-import { $overlayType, closeOverlay, showOverlay } from "@/lib/stores/overlay";
+import { $isFlavorDialogOpen, $overlayType, closeOverlay, showOverlay } from "@/lib/stores/overlay";
 import { $orderPhase } from "@/lib/stores/phase";
 import { $status, setStatusWithTimeout } from "@/lib/stores/status";
 import { AmountSection } from "./active-area/AmountSection";
@@ -67,6 +67,10 @@ export function ActiveArea(): ReactElement {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
+        // 味選択ダイアログ等が表示されている場合はショートカット無効
+        if ($isFlavorDialogOpen.get()) {
+          return;
+        }
 
         const currentOverlayType = $overlayType.get();
 
@@ -149,6 +153,11 @@ export function ActiveArea(): ReactElement {
       if (keyboardEvent.key !== "Backspace")
         return;
 
+      // オーバーレイ表示中は何もしない
+      if ($overlayType.get() !== null || $isFlavorDialogOpen.get()) {
+        return;
+      }
+
       // 長押しリセットがトリガー済みなら全てブロック
       if (longPressTriggeredRef.current) {
         keyboardEvent.preventDefault();
@@ -187,6 +196,11 @@ export function ActiveArea(): ReactElement {
     const handleKeyUp = (keyboardEvent: KeyboardEvent): void => {
       if (keyboardEvent.key !== "Backspace")
         return;
+      if ($overlayType.get() !== null || $isFlavorDialogOpen.get()) {
+        clearTimer();
+        clearProgressInterval();
+        return;
+      }
       longPressTriggeredRef.current = false;
       clearTimer();
       clearProgressInterval();

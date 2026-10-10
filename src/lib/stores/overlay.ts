@@ -11,6 +11,7 @@ export type OverlayType
     | "ITEM_EDIT";
 
 export const $overlayType = atom<Nullable<OverlayType>>(null);
+export const $isFlavorDialogOpen = atom<boolean>(false);
 
 export function showOverlay(type: OverlayType): void {
   $overlayType.set(type);

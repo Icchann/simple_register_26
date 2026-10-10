@@ -510,7 +510,7 @@ export function OrderTable(): ReactElement {
         <Table.body>
           {displayRows.map((row, index) => (
             <OrderTableRow
-              disabled={!isActive}
+              disabled={!isActive || flavorDialogState.isOpen}
               discountAmount={getDiscountAmountForRow(row.productCode) * Number.parseInt(row.quantity ?? "1", 10)}
               flavors={row.flavors}
               index={index + 1}

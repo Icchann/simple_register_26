@@ -29,12 +29,14 @@ export function ReceiptNumberInput({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === "Backspace") {
       event.preventDefault();
+      event.stopPropagation();
       setLocalReceiptNumber("");
       return;
     }
 
     if (event.key === "Enter") {
       event.preventDefault();
+      event.stopPropagation();
       const receiptValue = event.currentTarget.value.trim();
       if (receiptValue === "")
         return;
@@ -57,6 +59,7 @@ export function ReceiptNumberInput({
   const handleKeyUp = (event: React.KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === "Backspace") {
       event.preventDefault();
+      event.stopPropagation();
       requestAnimationFrame(() => {
         inputRef.current?.focus();
         inputRef.current?.select();

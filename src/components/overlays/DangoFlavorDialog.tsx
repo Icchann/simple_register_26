@@ -1,7 +1,8 @@
 import type { ReactElement } from "react";
 import { HStack, styled as p, VStack } from "panda/jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DANGO_FLAVORS, DangoFlavorImpl } from "@/lib/order";
+import { $isFlavorDialogOpen } from "@/lib/stores/overlay";
 
 export type DangoFlavorDialogProps = {
   isOpen: boolean;
@@ -18,6 +19,19 @@ export function DangoFlavorDialog({
 }: DangoFlavorDialogProps): ReactElement {
   const [firstFlavor, setFirstFlavor] = useState<string | null>(initialFlavor ?? null);
   const [secondFlavor, setSecondFlavor] = useState<string | null>(null);
+  const dialogCardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    $isFlavorDialogOpen.set(isOpen);
+    if (isOpen) {
+      requestAnimationFrame(() => {
+        dialogCardRef.current?.focus();
+      });
+    }
+    return (): void => {
+      $isFlavorDialogOpen.set(false);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen)
@@ -67,9 +81,12 @@ export function DangoFlavorDialog({
 
       // 数字キー 1〜4 による味の選択
       const matched = DANGO_FLAVORS.find((f) => f.key === e.key);
-      if (matched == null)
+      if (matched == null) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         return;
-
+      }
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
@@ -127,8 +144,11 @@ export function DangoFlavorDialog({
         gap="4"
         left="50%"
         maxW="[520px]"
+        outline="none"
         p="6"
         position="absolute"
+        ref={dialogCardRef}
+        tabIndex={-1}
         top="50%"
         transform="translate(-50%, -50%)"
         w="90%"
