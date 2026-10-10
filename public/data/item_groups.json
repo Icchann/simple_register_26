@@ -36,7 +36,7 @@
     "children": [
       {
         "id": "bdxpj17blx4jza95ii92zxdm",
-        "name": "ﾌｧﾝﾀ ｵﾚﾝｼﾞ",
+        "name": "Qoo オレンジ",
         "price": 100
       },
       {
@@ -47,11 +47,6 @@
       {
         "id": "ke03npycplggquox4ge694hk",
         "name": "コーラ",
-        "price": 100
-      },
-      {
-        "id": "y9ojznta5r3cs3un59lwpiow",
-        "name": "ラムネ",
         "price": 100
       }
     ]

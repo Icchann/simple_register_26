@@ -61,10 +61,15 @@ const ItemInfo = memo((): ReactElement => {
                       flexShrink="0"
                       h="7"
                       objectFit="cover"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (target.src.endsWith(".jpg")) {
+                          target.src = `/images/items/${child.id}.png`;
+                        }
+                      }}
                       src={`/images/items/${child.id}.jpg`}
                       w="7"
-                    >
-                    </p.img>
+                    />
                     <p.p
                       fontSize="clamp(10px, 0.85vw, 13px)"
                       overflow="hidden"
