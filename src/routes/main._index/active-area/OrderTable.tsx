@@ -410,19 +410,19 @@ export function OrderTable(): ReactElement {
   };
 
   return (
-    <p.table fontSize="sm" ref={tableRef} w="full">
+    <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} w="full">
       <Table.head>
         <p.tr>
-          <p.th w="10">#</p.th>
-          <p.th w="20">商品番号</p.th>
-          <p.th textAlign="left" w="stretch">商品名</p.th>
-          <p.th w="12" />
-          <p.th w="16">個数</p.th>
-          <p.th w="20">
+          <p.th w="10" whiteSpace="nowrap">#</p.th>
+          <p.th w="20" whiteSpace="nowrap">商品番号</p.th>
+          <p.th textAlign="left" w="stretch" whiteSpace="nowrap">商品名</p.th>
+          <p.th w="12" whiteSpace="nowrap" />
+          <p.th w="16" whiteSpace="nowrap">個数</p.th>
+          <p.th w="20" whiteSpace="nowrap">
             割引&ensp;
             <p.span color="gray.500">[円]</p.span>
           </p.th>
-          <p.th w="16">小計</p.th>
+          <p.th w="16" whiteSpace="nowrap">小計</p.th>
         </p.tr>
       </Table.head>
       <Table.body>

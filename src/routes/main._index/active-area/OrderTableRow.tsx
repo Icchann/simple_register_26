@@ -29,24 +29,29 @@ function ItemName(
 
   if (isSelectItemsPhase) {
     if (isBlank) {
-      return <p.p fontStyle="italic">Enter で割引確認へ</p.p>;
+      return <p.p fontStyle="italic" whiteSpace="nowrap">Enter で割引確認へ</p.p>;
     }
 
     if (itemWithItemNumber == null) {
-      return <p.p color="red.500" fontStyle="italic">該当なし</p.p>;
+      return <p.p color="red.500" fontStyle="italic" whiteSpace="nowrap">該当なし</p.p>;
     }
   }
 
   if (isBlank) {
-    return <p.p>---</p.p>;
+    return <p.p whiteSpace="nowrap">---</p.p>;
   }
 
   if (itemWithItemNumber == null) {
-    return <p.p color="red.500" fontStyle="italic">該当なし</p.p>;
+    return <p.p color="red.500" fontStyle="italic" whiteSpace="nowrap">該当なし</p.p>;
   }
 
   return (
-    <p.p>
+    <p.p
+      fontSize="clamp(11px, 0.9vw, 14px)"
+      overflow="hidden"
+      textOverflow="ellipsis"
+      whiteSpace="nowrap"
+    >
       {
         match(ItemImpl(itemWithItemNumber).getGroup()?.name)
           .with(P.nullish, () => "")
@@ -88,8 +93,8 @@ export const OrderTableRow = memo((
 
   return (
     <p.tr color="gray.500">
-      <Table.cell align="right">{props.index}</Table.cell>
-      <Table.cell align="right" color="black">
+      <Table.cell align="right" whiteSpace="nowrap">{props.index}</Table.cell>
+      <Table.cell align="right" color="black" whiteSpace="nowrap">
         <HStack gap="2" justifyContent="flex-end" w="full">
           <p.code color="gray.500">T</p.code>
           <NumberInput
@@ -111,16 +116,16 @@ export const OrderTableRow = memo((
           />
         </HStack>
       </Table.cell>
-      <Table.cell fontFamily="sans">
+      <Table.cell fontFamily="sans" whiteSpace="nowrap">
         <ItemName
           isBlank={props.productCode.trim() === "" && props.quantity.trim() === ""}
           itemWithItemNumber={itemInfo}
         />
       </Table.cell>
-      <Table.cell align="right">
+      <Table.cell align="right" whiteSpace="nowrap">
         {itemInfo?.price != null ? `@${itemInfo.price}` : "---"}
       </Table.cell>
-      <Table.cell align="right">
+      <Table.cell align="right" whiteSpace="nowrap">
         <HStack>
           <p.p fontFamily="sans">×</p.p>
           <NumberInput
@@ -143,10 +148,10 @@ export const OrderTableRow = memo((
           />
         </HStack>
       </Table.cell>
-      <Table.cell align="right" color={props.discountAmount > 0 ? "red.600" : undefined}>
+      <Table.cell align="right" color={props.discountAmount > 0 ? "red.600" : undefined} whiteSpace="nowrap">
         {props.discountAmount > 0 ? `-${props.discountAmount}` : "0"}
       </Table.cell>
-      <Table.cell align="right">
+      <Table.cell align="right" whiteSpace="nowrap">
         {itemInfo && props.quantity
           ? (itemInfo.price * Number.parseInt(props.quantity ?? "0", 10) - props.discountAmount)
           : "0"}

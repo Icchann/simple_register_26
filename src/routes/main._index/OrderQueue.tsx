@@ -30,8 +30,8 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
     style={{ backgroundColor: OrderStatusImpl(order.status).toColor().bg }}
   >
     <p.td />
-    <Table.cell align="right">
-      <p.p bg="white" border="1px solid" ml="auto" mr="0" textAlign="center" w="[30px]">
+    <Table.cell align="right" whiteSpace="nowrap">
+      <p.p bg="white" border="1px solid" ml="auto" mr="0" textAlign="center" w="[30px]" whiteSpace="nowrap">
         {ReceiptNumberImpl(order.receiptNumber).toStr()}
       </p.p>
     </Table.cell>
@@ -43,7 +43,7 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
               ? `T${ReceiptNumberImpl(item.itemNumber).toStr()}`
               : "--"}
           </Table.ItemNumber>
-          <Table.ItemName>
+          <Table.ItemName overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
             {
               match(ItemImpl(item).getGroup()?.name)
                 .with(P.nullish, () => "")
@@ -51,21 +51,22 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
             }
             {item.name}
           </Table.ItemName>
-          <Table.ItemPrice>{item.price}</Table.ItemPrice>
-          <Table.ItemAmount>{item.amount}</Table.ItemAmount>
+          <Table.ItemPrice whiteSpace="nowrap">{item.price}</Table.ItemPrice>
+          <Table.ItemAmount whiteSpace="nowrap">{item.amount}</Table.ItemAmount>
         </Table.OrderItem>
       ))}
     </p.td>
     <Table.cell
       align="center"
       fontSize="sm"
+      whiteSpace="nowrap"
     >
       <OrderStatusLabel orderStatus={order.status} />
     </Table.cell>
-    <Table.cell align="center">
+    <Table.cell align="center" whiteSpace="nowrap">
       {dateToStr(order.createdAt).timeOnly}
     </Table.cell>
-    <Table.cell align="center">
+    <Table.cell align="center" whiteSpace="nowrap">
       {order.status === "PICKED_UP"
         ? new Date(
             order.statusChange.find((sc) => sc.to === "PICKED_UP")?.at ?? order.createdAt,
@@ -196,12 +197,12 @@ export function OrderQueue(): ReactElement {
         overflowY="auto"
         ref={tableContainerRef}
       >
-        <p.table w="full">
+        <p.table fontSize="clamp(11px, 0.85vw, 14px)" w="full">
           <Table.head>
             <p.tr>
               <p.th w="0"></p.th>
-              <p.th w="20">受付番号</p.th>
-              <p.th w="stretch">
+              <p.th w="20" whiteSpace="nowrap">受付番号</p.th>
+              <p.th w="stretch" whiteSpace="nowrap">
                 注文内容
                 <p.div
                   display="flex"
@@ -210,15 +211,15 @@ export function OrderQueue(): ReactElement {
                   gap="2"
                   mt="1"
                 >
-                  <p.div w="16">商品番号</p.div>
-                  <p.div flex="1" textAlign="left">商品</p.div>
-                  <p.div textAlign="right" w="20">価格 [円]</p.div>
-                  <p.div w="12">数量</p.div>
+                  <p.div w="16" whiteSpace="nowrap">商品番号</p.div>
+                  <p.div flex="1" textAlign="left" whiteSpace="nowrap">商品</p.div>
+                  <p.div textAlign="right" w="20" whiteSpace="nowrap">価格 [円]</p.div>
+                  <p.div w="12" whiteSpace="nowrap">数量</p.div>
                 </p.div>
               </p.th>
-              <p.th w="24">状態</p.th>
-              <p.th w="20">注文時刻</p.th>
-              <p.th w="20">受取時刻</p.th>
+              <p.th w="24" whiteSpace="nowrap">状態</p.th>
+              <p.th w="20" whiteSpace="nowrap">注文時刻</p.th>
+              <p.th w="20" whiteSpace="nowrap">受取時刻</p.th>
             </p.tr>
           </Table.head>
           <Table.body>

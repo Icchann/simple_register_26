@@ -18,7 +18,7 @@ import { OrderTable } from "./active-area/OrderTable";
 
 function LeftArea(): ReactElement {
   return (
-    <Expanded minH="0" minW="0" overflowY="auto">
+    <Expanded minH="0" minW="0" overflow="hidden">
       <Information />
     </Expanded>
   );
@@ -34,7 +34,7 @@ function MiddleArea(): ReactElement {
 
 function RightArea(): ReactElement {
   return (
-    <Expanded minH="0" minW="0" overflowY="auto">
+    <Expanded minH="0" minW="0" overflow="hidden">
       <AmountSection />
     </Expanded>
   );

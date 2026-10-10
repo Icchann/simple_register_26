@@ -236,18 +236,18 @@ export function AmountSection(): ReactElement {
         </Table.head>
         <Table.body>
           <TableBodyRow bg="green.600" color="white">
-            <Table.cell align="right" verticalAlign="middle!">
+            <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
               合計
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <p.code fontSize="2xl">{total.toLocaleString("ja-JP")}</p.code>
-                <p.p>円</p.p>
+                <p.code fontSize="clamp(1.25rem, 1.8vw, 1.5rem)">{total.toLocaleString("ja-JP")}</p.code>
+                <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
           </TableBodyRow>
           <TableBodyRow bg="red.200">
-            <Table.cell align="right" verticalAlign="middle!">
+            <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
               うち&ensp;割引
             </Table.cell>
             <Table.cell textAlign="right">
@@ -257,7 +257,7 @@ export function AmountSection(): ReactElement {
                     {(!discountCode || discountCode === "") && (
                       <p.span
                         color="gray.600"
-                        fontSize="xs"
+                        fontSize="clamp(9px, 0.8vw, 12px)"
                         whiteSpace="nowrap"
                       >
                         未入力: 割引なし
@@ -270,7 +270,7 @@ export function AmountSection(): ReactElement {
                           _current={{ color: "red.700", fontWeight: "bold" }}
                           color="gray.700"
                           data-current={isSelected ? "true" : undefined}
-                          fontSize="xs"
+                          fontSize="clamp(9px, 0.8vw, 12px)"
                           key={d.id}
                           whiteSpace="nowrap"
                         >
@@ -365,24 +365,24 @@ export function AmountSection(): ReactElement {
                 </HStack>
                 <p.code
                   color="red.600"
-                  fontSize="2xl"
+                  fontSize="clamp(1.25rem, 1.8vw, 1.5rem)"
                   w="32"
                 >
                   {totalDiscount > 0 ? `-${totalDiscount.toLocaleString("ja-JP")}` : "0"}
                 </p.code>
-                <p.p>円</p.p>
+                <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
           </TableBodyRow>
           <TableBodyRow>
-            <Table.cell align="right" verticalAlign="middle!">
+            <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
               預かり
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
                 <NumberInput
                   disabled={orderPhase !== "PROCESS_PAYMENT"}
-                  fontSize="2xl"
+                  fontSize="clamp(1.25rem, 1.8vw, 1.5rem)"
                   inputMode="numeric"
                   onChange={(event) => {
                     // カンマを除去して数値のみを保存
@@ -444,18 +444,18 @@ export function AmountSection(): ReactElement {
                   value={depositAmountDisplay}
                   w="32"
                 />
-                <p.p>円</p.p>
+                <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
           </TableBodyRow>
           <TableBodyRow>
-            <Table.cell align="right" verticalAlign="middle!">
+            <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
               お釣り
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <p.code fontSize="2xl">{change.toLocaleString("ja-JP")}</p.code>
-                <p.p>円</p.p>
+                <p.code fontSize="clamp(1.25rem, 1.8vw, 1.5rem)">{change.toLocaleString("ja-JP")}</p.code>
+                <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
           </TableBodyRow>

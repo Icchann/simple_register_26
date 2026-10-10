@@ -32,6 +32,7 @@ const pickupMonitorStyles = sva({
       p: "1",
       px: "2",
       w: "full",
+      whiteSpace: "nowrap",
     },
     grid: {
       gap: "2",
@@ -51,7 +52,7 @@ const pickupMonitorStyles = sva({
     size: {
       small: {
         title: {
-          fontSize: "2xl",
+          fontSize: "clamp(1.1rem, 1.4vw, 1.5rem)",
         },
         grid: {
           gridTemplateColumns: "repeat(auto-fill, minmax(60px, 1fr))",

@@ -20,31 +20,33 @@ const ItemInfo = memo((): ReactElement => {
   const item = useStore($items);
 
   return (
-    <VStack alignItems="flex-start" p="2"w="full">
+    <VStack alignItems="flex-start" p="1.5" w="full">
       <Grid
         gridTemplateColumns="1fr 1fr 1fr"
         w="full"
       >
         {item.map((it) => (
-          <VStack alignItems="flex-start" key={it.id} w="full">
-            <p.p fontSize="lg" fontWeight="bold">{it.name}</p.p>
-            <VStack alignItems="flex-start" gap="1" w="full">
+          <VStack alignItems="flex-start" key={it.id} minW="0" w="full">
+            <p.p fontSize="clamp(12px, 1.1vw, 16px)" fontWeight="bold" whiteSpace="nowrap">{it.name}</p.p>
+            <VStack alignItems="flex-start" gap="1" minW="0" w="full">
               {
                 it.children.map((child) => (
-                  <HStack gap="2" key={child.id}>
+                  <HStack gap="1" key={child.id} minW="0" w="full">
                     <p.code
                       alignItems="center"
                       aspectRatio="1 / 1"
                       border="1px solid"
                       display="grid"
-                      fontSize="sm"
-                      h="8"
+                      flexShrink="0"
+                      fontSize="clamp(11px, 0.9vw, 13px)"
+                      h="7"
                       lineHeight="none"
                       placeItems="center"
                       position="relative"
+                      w="7"
                     >
                       <p.span
-                        fontSize="xs"
+                        fontSize="[9px]"
                         left="0"
                         p="[1px]"
                         position="absolute"
@@ -56,12 +58,19 @@ const ItemInfo = memo((): ReactElement => {
                     </p.code>
                     <p.img
                       aspectRatio="1 / 1"
-                      h="8"
+                      flexShrink="0"
+                      h="7"
                       objectFit="cover"
                       src={`/images/items/${child.id}.jpg`}
+                      w="7"
                     >
                     </p.img>
-                    <p.p>
+                    <p.p
+                      fontSize="clamp(10px, 0.85vw, 13px)"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                    >
                       {child.name}
                     </p.p>
                   </HStack>
@@ -129,7 +138,7 @@ export function Information(): ReactElement {
         w="full"
       >
         <HStack gap="2" p="2">
-          <p.p>
+          <p.p fontSize="clamp(12px, 1vw, 15px)" whiteSpace="nowrap">
             受付番号
           </p.p>
           <NumberInput
@@ -209,7 +218,7 @@ export function Information(): ReactElement {
           />
           {suggestedReceiptNumber !== localReceiptNumber
             ? (
-                <HStack color="yellow.600" fontSize="sm" fontWeight="bold" gap="1">
+                <HStack color="yellow.600" fontSize="clamp(10px, 0.8vw, 12px)" fontWeight="bold" gap="1" whiteSpace="nowrap">
                   <IconMaterialSymbolsWarning />
                   受付番号の変更アリ (未連続)
                 </HStack>

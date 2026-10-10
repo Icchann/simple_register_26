@@ -24,15 +24,15 @@ export function BasicInfo(): ReactElement {
       </HStack>
       <HStack alignItems="stretch" flex="1" gap="2">
         <Card centralized>
-          <VStack>
-            <p.p>合計受付数</p.p>
-            <p.code fontSize="5xl" lineHeight="none" mx="auto">{totalAccepted}</p.code>
+          <VStack gap="1">
+            <p.p fontSize="clamp(11px, 0.9vw, 15px)" whiteSpace="nowrap">合計受付数</p.p>
+            <p.code fontSize="clamp(2rem, 3.5vw, 3.5rem)" lineHeight="none" mx="auto">{totalAccepted}</p.code>
           </VStack>
         </Card>
         <Card centralized>
-          <VStack>
-            <p.p>合計受取済数</p.p>
-            <p.code fontSize="5xl" lineHeight="none" mx="auto">{totalPickedUp}</p.code>
+          <VStack gap="1">
+            <p.p fontSize="clamp(11px, 0.9vw, 15px)" whiteSpace="nowrap">合計受取済数</p.p>
+            <p.code fontSize="clamp(2rem, 3.5vw, 3.5rem)" lineHeight="none" mx="auto">{totalPickedUp}</p.code>
           </VStack>
         </Card>
       </HStack>
