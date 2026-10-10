@@ -243,7 +243,7 @@ const OrderQueueRow = memo(
         )}
         {visibleColumns?.itemContent !== false && (
           <p.td className={styles.bodyCell}>
-            {order.items.map((item) => (
+            {order.items.filter((item) => order.status === "UNCONFIRMED" || item.amount > 0).map((item) => (
               <p.div className={styles.orderItem} key={item.id}>
                 {visibleColumns?.itemNumber !== false && (
                   <p.div className={styles.itemNumber} position="relative">
@@ -374,17 +374,19 @@ const ConfirmedOrdersList = memo(
       if (filterGroupId != null) {
         filteredOrders = filteredOrders.filter((order) =>
           order.items.some(
-            (item) => itemGroupMap.get(item.id) === filterGroupId,
+            (item) => (order.status === "UNCONFIRMED" || item.amount > 0) && itemGroupMap.get(item.id) === filterGroupId,
           ),
         );
       }
 
       return filteredOrders.map((order) => ({
         ...order,
-        items: order.items.map((item) => ({
-          ...item,
-          itemNumber: itemNumberMap.get(item.id) ?? null,
-        })),
+        items: order.items
+          .filter((item) => order.status === "UNCONFIRMED" || item.amount > 0)
+          .map((item) => ({
+            ...item,
+            itemNumber: itemNumberMap.get(item.id) ?? null,
+          })),
       }));
     }, [orders, items, filterGroupId, filterStatus]);
 

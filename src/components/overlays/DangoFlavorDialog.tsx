@@ -1,7 +1,9 @@
 import type { ReactElement } from "react";
+import { useStore } from "@nanostores/react";
 import { HStack, styled as p, VStack } from "panda/jsx";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DANGO_FLAVORS, DangoFlavorImpl } from "@/lib/order";
+import { $items } from "@/lib/stores/items";
 import { $isFlavorDialogOpen } from "@/lib/stores/overlay";
 
 export type DangoFlavorDialogProps = {
@@ -17,7 +19,19 @@ export function DangoFlavorDialog({
   onConfirm,
   onClose,
 }: DangoFlavorDialogProps): ReactElement {
-  const [firstFlavor, setFirstFlavor] = useState<string | null>(initialFlavor ?? null);
+  const items = useStore($items);
+  const dangoGroup = items.find((g) => g.name === "だんご");
+  const isFlavorSoldOut = useCallback((flavorName: string): boolean => {
+    const item = dangoGroup?.children.find((c) => c.name === flavorName);
+    return item?.isSoldOut === true;
+  }, [dangoGroup]);
+
+  const [firstFlavor, setFirstFlavor] = useState<string | null>(() => {
+    if (initialFlavor != null && !isFlavorSoldOut(initialFlavor)) {
+      return initialFlavor;
+    }
+    return null;
+  });
   const [secondFlavor, setSecondFlavor] = useState<string | null>(null);
   const dialogCardRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +105,9 @@ export function DangoFlavorDialog({
       e.stopPropagation();
       e.stopImmediatePropagation();
       const chosenFlavor = matched.name;
+      if (isFlavorSoldOut(chosenFlavor)) {
+        return;
+      }
 
       if (firstFlavor == null) {
         // 1つ目の味を選択
@@ -106,7 +123,7 @@ export function DangoFlavorDialog({
     return (): void => {
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
     };
-  }, [isOpen, firstFlavor, secondFlavor, initialFlavor, onConfirm, onClose]);
+  }, [isOpen, firstFlavor, secondFlavor, initialFlavor, isFlavorSoldOut, onConfirm, onClose]);
 
   if (!isOpen)
     return <></>;
@@ -228,19 +245,23 @@ export function DangoFlavorDialog({
         {/* 味の候補一覧 */}
         <p.div display="grid" gap="2" gridTemplateColumns="repeat(2, 1fr)" w="full">
           {DANGO_FLAVORS.map((flavor) => {
+            const isSoldOut = isFlavorSoldOut(flavor.name);
             const isSelected = firstFlavor === flavor.name || secondFlavor === flavor.name;
             const colors = DangoFlavorImpl(flavor.name).toColor();
 
             return (
               <HStack
-                bg={isSelected ? colors.bg : "gray.50"}
-                borderColor={isSelected ? colors.borderColor : "gray.200"}
+                bg={isSoldOut ? "red.50" : isSelected ? colors.bg : "gray.50"}
+                borderColor={isSoldOut ? "red.300" : isSelected ? colors.borderColor : "gray.200"}
                 borderRadius="md"
                 borderWidth="2px"
-                cursor="pointer"
+                cursor={isSoldOut ? "not-allowed" : "pointer"}
                 gap="3"
                 key={flavor.key}
                 onClick={() => {
+                  if (isSoldOut) {
+                    return;
+                  }
                   if (firstFlavor == null) {
                     setFirstFlavor(flavor.name);
                   } else {
@@ -248,10 +269,12 @@ export function DangoFlavorDialog({
                     onConfirm(result);
                   }
                 }}
+                opacity={isSoldOut ? 0.6 : 1}
                 p="3"
+                position="relative"
               >
                 <p.code
-                  bg="gray.800"
+                  bg={isSoldOut ? "red.700" : "gray.800"}
                   borderRadius="sm"
                   color="white"
                   fontSize="md"
@@ -262,12 +285,19 @@ export function DangoFlavorDialog({
                   {flavor.key}
                 </p.code>
                 <p.span
-                  color={isSelected ? colors.color : "gray.800"}
+                  color={isSoldOut ? "red.700" : isSelected ? colors.color : "gray.800"}
                   fontSize="md"
                   fontWeight="bold"
+                  textDecoration={isSoldOut ? "line-through" : undefined}
                 >
                   {flavor.name}
                 </p.span>
+                {isSoldOut && (
+                  <HStack color="red.600" fontSize="xs" fontWeight="bold" gap="0.5" ml="auto">
+                    <p.span fontSize="sm">✕</p.span>
+                    <p.span>売切</p.span>
+                  </HStack>
+                )}
               </HStack>
             );
           })}

@@ -166,7 +166,22 @@ export function AmountSection(): ReactElement {
 
     // 注文アイテムを構築（正規化済み: 同じ商品をまとめる）
     const normalizedItems = getNormalizedCurrentOrderItems(filledRows);
-    const orderItems: Array<Order["items"][number]> = normalizedItems.map((item) => ({
+    const activeItems = normalizedItems.filter((item) => item.amount > 0);
+    if (activeItems.length === 0) {
+      return;
+    }
+
+    const soldOutItem = activeItems.find((it) => it.isSoldOut === true);
+    if (soldOutItem) {
+      setStatusWithTimeout({
+        type: "INVALID_VALUE",
+        detail: { type: "ITEM_SOLD_OUT", itemName: soldOutItem.name },
+        receiptNumber,
+      });
+      return;
+    }
+
+    const orderItems: Array<Order["items"][number]> = activeItems.map((item) => ({
       id: item.id,
       name: item.name,
       price: item.price,

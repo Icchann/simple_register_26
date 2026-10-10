@@ -1,10 +1,12 @@
 import type { ReactElement } from "react";
 import { useStore } from "@nanostores/react";
 import { css } from "panda/css";
-import { HStack, styled as p, VStack } from "panda/jsx";
+import { Grid, HStack, styled as p, VStack } from "panda/jsx";
 import { match } from "ts-pattern";
 import { Button } from "@/components/atomic/Button";
+import { NumberInput } from "@/components/atomic/NumberInput";
 import { ReceiptNumberInput } from "@/components/overlays/ReceiptNumberInput";
+import { $items, toggleItemSoldOut, toggleItemSoldOutByNumber } from "@/lib/stores/items";
 import { changeOrderStatus } from "@/lib/stores/orders";
 import { $overlayType } from "@/lib/stores/overlay";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -15,6 +17,7 @@ export type MenuDialogProps = {
 
 export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
   const overlayType = useStore($overlayType);
+  const items = useStore($items);
 
   const { title, bgClassName, icon } = match(overlayType)
     .with("COOKING_COMPLETE", () => ({
@@ -123,22 +126,137 @@ export function MenuDialog({ onClose }: MenuDialogProps): ReactElement {
                 onConfirm={handleConfirm}
                 onInvalidReceiptNumber={handleInvalidReceiptNumber}
               />
+              <p.p color="gray.800" fontSize="sm" fontWeight="medium">
+                もう一度同じボタンを押すと戻ります
+              </p.p>
             </VStack>
           )
-        : (
-            <>
-              <p.p color="gray.700">
-                オーバーレイタイプ:
-                {" "}
-                {overlayType ?? "なし"}
-              </p.p>
-              <VStack gap="2" w="full">
-                <Button onClick={onClose} w="full">
+        : overlayType === "ITEM_EDIT"
+          ? (
+              <VStack gap="3" maxH="80vh" w="full">
+                <p.p fontSize="sm" fontWeight="medium">
+                  クリックまたは商品番号を入力して売り切れ状態（✕）を切り替えます
+                </p.p>
+                <HStack gap="2">
+                  <p.span fontSize="sm" fontWeight="bold">商品番号:</p.span>
+                  <NumberInput
+                    autoFocus
+                    h="9"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        const val = Number.parseInt(e.currentTarget.value, 10);
+                        if (!Number.isNaN(val)) {
+                          toggleItemSoldOutByNumber(val);
+                          e.currentTarget.value = "";
+                        }
+                      }
+                    }}
+                    outline={{
+                      base: "2px solid",
+                      _focus: "3px solid",
+                    }}
+                    outlineColor="black"
+                    textAlign="center"
+                    w="16"
+                  />
+                  <p.span color="gray.700" fontSize="xs">
+                    (番号入力後 Enter)
+                  </p.span>
+                </HStack>
+                <VStack
+                  bg="white/70"
+                  borderColor="gray.400"
+                  borderRadius="md"
+                  borderWidth="1px"
+                  gap="3"
+                  maxH="45vh"
+                  overflowY="auto"
+                  p="3"
+                  w="full"
+                >
+                  {items.map((group) => (
+                    <VStack alignItems="flex-start" gap="1" key={group.id} w="full">
+                      <p.p color="gray.800" fontSize="xs" fontWeight="bold">
+                        {group.name}
+                      </p.p>
+                      <Grid gap="1.5" gridTemplateColumns="repeat(2, 1fr)" w="full">
+                        {group.children.map((child) => {
+                          const isSoldOut = child.isSoldOut === true;
+                          return (
+                            <HStack
+                              bg={isSoldOut ? "red.100" : "white"}
+                              borderColor={isSoldOut ? "red.400" : "gray.300"}
+                              borderRadius="sm"
+                              borderWidth="1px"
+                              cursor="pointer"
+                              fontSize="xs"
+                              justifyContent="space-between"
+                              key={child.id}
+                              onClick={() => {
+                                toggleItemSoldOut(child.id);
+                              }}
+                              px="2"
+                              py="1.5"
+                            >
+                              <HStack gap="1.5">
+                                <p.code
+                                  bg="gray.800"
+                                  borderRadius="sm"
+                                  color="white"
+                                  fontSize="[10px]"
+                                  px="1"
+                                >
+                                  {child.itemNumber.toString().padStart(2, "0")}
+                                </p.code>
+                                <p.span
+                                  color={isSoldOut ? "red.800" : "gray.900"}
+                                  fontWeight="medium"
+                                  textDecoration={isSoldOut ? "line-through" : undefined}
+                                >
+                                  {child.name}
+                                </p.span>
+                              </HStack>
+                              <p.span
+                                bg={isSoldOut ? "red.600" : "green.600"}
+                                borderRadius="sm"
+                                color="white"
+                                fontSize="[10px]"
+                                fontWeight="bold"
+                                px="1.5"
+                                py="0.5"
+                              >
+                                {isSoldOut ? "✕ 売り切れ" : "販売中"}
+                              </p.span>
+                            </HStack>
+                          );
+                        })}
+                      </Grid>
+                    </VStack>
+                  ))}
+                </VStack>
+                <p.p color="gray.800" fontSize="sm" fontWeight="medium">
+                  もう一度同じボタンを押すと戻ります
+                </p.p>
+                <Button onClick={onClose} size="sm" w="48">
                   閉じる
                 </Button>
               </VStack>
-            </>
-          )}
+            )
+          : (
+              <>
+                <p.p color="gray.700">
+                  オーバーレイタイプ:
+                  {" "}
+                  {overlayType ?? "なし"}
+                </p.p>
+                <VStack gap="2" w="full">
+                  <Button onClick={onClose} w="full">
+                    閉じる
+                  </Button>
+                </VStack>
+              </>
+            )}
     </VStack>
   );
 }

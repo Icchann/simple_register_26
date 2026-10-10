@@ -267,6 +267,9 @@ export function validateExtraPortion(
   let extraCount = 0;
 
   for (const item of items) {
+    if (item.amount <= 0) {
+      continue;
+    }
     const group = ItemImpl(item).getGroup();
     if (item.name === "増量") {
       extraCount += item.amount;

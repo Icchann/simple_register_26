@@ -7,8 +7,8 @@ export type OrderNumber = typeof OrderNumber.infer;
 export const MAX_RECEIPT_NUMBER = 50 as const;
 export const ReceiptNumber = type(`1 <= number.integer#receiptNumber <= ${MAX_RECEIPT_NUMBER}`);
 export type ReceiptNumber = typeof ReceiptNumber.infer;
-
-export const OrderItemAmount = type("0 <= number.integer#orderItemAmount <= 100");
+export const MAX_ORDER_ITEM_AMOUNT = 100 as const;
+export const OrderItemAmount = type(`0 <= number.integer#orderItemAmount <= ${MAX_ORDER_ITEM_AMOUNT}`);
 export type OrderItemAmount = typeof OrderItemAmount.infer;
 
 export const OrderStatus = type(

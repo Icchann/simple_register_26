@@ -36,7 +36,7 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
       </p.p>
     </Table.cell>
     <p.td>
-      {order.items.map((item) => (
+      {order.items.filter((item) => order.status === "UNCONFIRMED" || item.amount > 0).map((item) => (
         <Table.OrderItem key={item.id}>
           <Table.ItemNumber position="relative">
             {item.itemNumber != null
@@ -82,7 +82,13 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
                 )}
           </Table.ItemName>
           <Table.ItemPrice whiteSpace="nowrap">{item.price}</Table.ItemPrice>
-          <Table.ItemAmount whiteSpace="nowrap">{item.amount}</Table.ItemAmount>
+          <Table.ItemAmount
+            color={item.amount === 0 ? "gray.400" : undefined}
+            textDecoration={item.amount === 0 ? "line-through" : undefined}
+            whiteSpace="nowrap"
+          >
+            {item.amount}
+          </Table.ItemAmount>
         </Table.OrderItem>
       ))}
     </p.td>
@@ -128,10 +134,12 @@ const ConfirmedOrdersList = memo((): ReactElement => {
     // すべての注文を表示（UNCONFIRMED は $orders に含まれない）
     return orders.map((order) => ({
       ...order,
-      items: order.items.map((item) => ({
-        ...item,
-        itemNumber: itemNumberMap.get(item.id) ?? null,
-      })),
+      items: order.items
+        .filter((item) => item.amount > 0)
+        .map((item) => ({
+          ...item,
+          itemNumber: itemNumberMap.get(item.id) ?? null,
+        })),
     }));
   }, [orders, items]);
 

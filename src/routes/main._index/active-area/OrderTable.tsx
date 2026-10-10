@@ -21,12 +21,14 @@ import {
   createOrderRow,
   findDiscountByNumber,
   findItemByNumber,
+  getNormalizedCurrentOrderItems,
   updateOrderRows,
   validateOrderItems,
 } from "@/lib/stores/current-order";
 import { $orderPhase } from "@/lib/stores/phase";
 import { setStatusWithTimeout } from "@/lib/stores/status";
 import { DiscountNumber, ItemNumber } from "@/types/item";
+import { MAX_ORDER_ITEM_AMOUNT } from "@/types/order";
 import { OrderTableRow } from "./OrderTableRow";
 
 export type KeyField = "productCode" | "quantity";
@@ -250,6 +252,28 @@ export function OrderTable(): ReactElement {
               return;
             }
 
+            // 売り切れ商品および有効数量（1個以上）の検証
+            const normalizedItems = getNormalizedCurrentOrderItems(rows);
+            const activeItems = normalizedItems.filter((it) => it.amount > 0);
+            if (activeItems.length === 0) {
+              setStatusWithTimeout({
+                type: "INVALID_VALUE",
+                detail: { type: "ITEM_EMPTY" },
+                receiptNumber: $currentOrder.get().receiptNumber,
+              });
+              return;
+            }
+
+            const soldOutItem = activeItems.find((it) => it.isSoldOut === true);
+            if (soldOutItem) {
+              setStatusWithTimeout({
+                type: "INVALID_VALUE",
+                detail: { type: "ITEM_SOLD_OUT", itemName: soldOutItem.name },
+                receiptNumber: $currentOrder.get().receiptNumber,
+              });
+              return;
+            }
+
             // 団子と増量、および味の数量整合性を検証
             const validationResult = validateOrderItems();
             if (validationResult.isErr()) {
@@ -298,6 +322,19 @@ export function OrderTable(): ReactElement {
                 type: "INVALID_VALUE",
                 receiptNumber: $currentOrder.get().receiptNumber,
                 detail: { type: "ITEM_NUMBER", itemNumber: currentValue },
+              },
+            );
+            return;
+          }
+
+          if (item.isSoldOut === true) {
+            event.preventDefault();
+            event.currentTarget.select();
+            setStatusWithTimeout(
+              {
+                type: "INVALID_VALUE",
+                receiptNumber: $currentOrder.get().receiptNumber,
+                detail: { type: "ITEM_SOLD_OUT", itemName: item.name },
               },
             );
             return;
@@ -353,9 +390,9 @@ export function OrderTable(): ReactElement {
           setPendingFocusIndex(displayIndex + 1);
         }
       } else if (field === "quantity") {
-        // 個数のバリデーション: 10を超える場合はエラー
+        // 個数のバリデーション: 0〜MAX_ORDER_ITEM_AMOUNT(100)の範囲外はエラー（0個は消去目的で許容）
         const quantity = Number.parseInt(currentValue || "1", 10);
-        if (quantity > 10) {
+        if (quantity < 0 || quantity > MAX_ORDER_ITEM_AMOUNT) {
           event.preventDefault();
           event.currentTarget.select();
           setStatusWithTimeout(

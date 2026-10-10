@@ -52,6 +52,10 @@ export type Status
       }
       | {
         type: "FLAVOR_COUNT_EXCEEDED";
+      }
+      | {
+        type: "ITEM_SOLD_OUT";
+        itemName: string;
       };
   }
   | {

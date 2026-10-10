@@ -9,7 +9,7 @@ import { NumberInput } from "@/components/atomic/NumberInput";
 import { registerReceiptInput } from "@/lib/focus-manager";
 import { ReceiptNumberImpl } from "@/lib/order";
 import { setCreatedAt, setOrderId, setReceiptNumber } from "@/lib/stores/current-order";
-import { $items } from "@/lib/stores/items";
+import { $items, toggleItemSoldOut } from "@/lib/stores/items";
 import { $orders } from "@/lib/stores/orders";
 import { $orderPhase } from "@/lib/stores/phase";
 import { setStatusWithTimeout } from "@/lib/stores/status";
@@ -30,56 +30,110 @@ const ItemInfo = memo((): ReactElement => {
             <p.p fontSize="clamp(12px, 1.1vw, 16px)" fontWeight="bold" whiteSpace="nowrap">{it.name}</p.p>
             <VStack alignItems="flex-start" gap="1" minW="0" w="full">
               {
-                it.children.map((child) => (
-                  <HStack gap="1" key={child.id} minW="0" w="full">
-                    <p.code
-                      alignItems="center"
-                      aspectRatio="1 / 1"
-                      border="1px solid"
-                      display="grid"
-                      flexShrink="0"
-                      fontSize="clamp(11px, 0.9vw, 13px)"
-                      h="7"
-                      lineHeight="none"
-                      placeItems="center"
-                      position="relative"
-                      w="7"
-                    >
-                      <p.span
-                        fontSize="[9px]"
-                        left="0"
-                        p="[1px]"
-                        position="absolute"
-                        top="0"
-                      >
-                        T
-                      </p.span>
-                      {child.itemNumber.toString().padStart(2, "0")}
-                    </p.code>
-                    <p.img
-                      aspectRatio="1 / 1"
-                      flexShrink="0"
-                      h="7"
-                      objectFit="cover"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        if (target.src.endsWith(".jpg")) {
-                          target.src = `/images/items/${child.id}.png`;
-                        }
+                it.children.map((child) => {
+                  const isSoldOut = child.isSoldOut === true;
+                  return (
+                    <HStack
+                      cursor="pointer"
+                      gap="1"
+                      key={child.id}
+                      minW="0"
+                      onClick={() => {
+                        toggleItemSoldOut(child.id);
                       }}
-                      src={`/images/items/${child.id}.jpg`}
-                      w="7"
-                    />
-                    <p.p
-                      fontSize="clamp(10px, 0.85vw, 13px)"
-                      overflow="hidden"
-                      textOverflow="ellipsis"
-                      whiteSpace="nowrap"
+                      opacity={isSoldOut ? 0.6 : 1}
+                      title={isSoldOut ? "売り切れ（クリックで解除）" : "クリックで売り切れ設定"}
+                      w="full"
                     >
-                      {child.name}
-                    </p.p>
-                  </HStack>
-                ))
+                      <p.code
+                        alignItems="center"
+                        aspectRatio="1 / 1"
+                        border="1px solid"
+                        borderColor={isSoldOut ? "red.400" : undefined}
+                        color={isSoldOut ? "red.600" : undefined}
+                        display="grid"
+                        flexShrink="0"
+                        fontSize="clamp(11px, 0.9vw, 13px)"
+                        h="7"
+                        lineHeight="none"
+                        placeItems="center"
+                        position="relative"
+                        w="7"
+                      >
+                        <p.span
+                          fontSize="[9px]"
+                          left="0"
+                          p="[1px]"
+                          position="absolute"
+                          top="0"
+                        >
+                          T
+                        </p.span>
+                        {child.itemNumber.toString().padStart(2, "0")}
+                      </p.code>
+                      <p.div
+                        aspectRatio="1 / 1"
+                        flexShrink="0"
+                        h="7"
+                        position="relative"
+                        w="7"
+                      >
+                        <p.img
+                          aspectRatio="1 / 1"
+                          h="full"
+                          objectFit="cover"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            if (target.src.endsWith(".jpg")) {
+                              target.src = `/images/items/${child.id}.png`;
+                            }
+                          }}
+                          src={`/images/items/${child.id}.jpg`}
+                          w="full"
+                        />
+                        {isSoldOut
+                          ? (
+                              <p.div
+                                alignItems="center"
+                                aria-label="売り切れ"
+                                display="flex"
+                                h="full"
+                                inset="0"
+                                justifyContent="center"
+                                pointerEvents="none"
+                                position="absolute"
+                                w="full"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="100%"
+                                  stroke="var(--colors-red-600, #dc2626)"
+                                  strokeLinecap="round"
+                                  strokeWidth="3.5"
+                                  viewBox="0 0 24 24"
+                                  width="100%"
+                                >
+                                  <line x1="4" x2="20" y1="4" y2="20" />
+                                  <line x1="20" x2="4" y1="4" y2="20" />
+                                </svg>
+                              </p.div>
+                            )
+                          : null}
+                      </p.div>
+                      <p.p
+                        color={isSoldOut ? "red.600" : undefined}
+                        fontSize="clamp(10px, 0.85vw, 13px)"
+                        overflow="hidden"
+                        textDecoration={isSoldOut ? "line-through" : undefined}
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                      >
+                        {child.name}
+                        {isSoldOut ? " (売切)" : ""}
+                      </p.p>
+                    </HStack>
+                  );
+                })
               }
             </VStack>
           </VStack>

@@ -170,7 +170,7 @@ function Status(): ReactElement {
                 {" "}
                 <p.code>{quantity.toString()}</p.code>
                 {" "}
-                は大きすぎます
+                は範囲外です (0〜100)
               </p.p>
             </>
           ))
@@ -207,6 +207,16 @@ function Status(): ReactElement {
               <IconMaterialSymbolsError />
               <p.p>
                 だんごの味は2種類までしか選べません
+              </p.p>
+            </>
+          ))
+          .with({ type: "ITEM_SOLD_OUT" }, ({ itemName }) => (
+            <>
+              <IconMaterialSymbolsError />
+              <p.p>
+                商品「
+                {itemName}
+                」は売り切れです
               </p.p>
             </>
           ))

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { Order } from "@/types/order";
+import { type } from "arktype";
+import { MAX_ORDER_ITEM_AMOUNT, Order, OrderItemAmount } from "@/types/order";
 import { $orders, changeOrderStatus } from "./orders";
 
 describe("changeOrderStatus with duplicate receipt numbers", () => {
@@ -72,5 +73,21 @@ describe("changeOrderStatus with duplicate receipt numbers", () => {
     // 3rd pickup complete -> should return false
     const pickupSuccess3 = changeOrderStatus(1, "PICKED_UP");
     expect(pickupSuccess3).toBe(false);
+  });
+});
+
+describe("OrderItemAmount and 0-amount items", () => {
+  it("accepts 0 and MAX_ORDER_ITEM_AMOUNT (100) but rejects negative or >100", () => {
+    expect(MAX_ORDER_ITEM_AMOUNT).toBe(100);
+
+    // 0 is valid (used to clear items)
+    expect(OrderItemAmount(0) instanceof type.errors).toBe(false);
+    // 100 is valid
+    expect(OrderItemAmount(100) instanceof type.errors).toBe(false);
+
+    // Negative is invalid
+    expect(OrderItemAmount(-1) instanceof type.errors).toBe(true);
+    // >100 is invalid
+    expect(OrderItemAmount(101) instanceof type.errors).toBe(true);
   });
 });
