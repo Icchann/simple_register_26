@@ -5,11 +5,10 @@ import { styled as p, VStack } from "panda/jsx";
 import { useState } from "react";
 
 export default function (): ReactElement {
-  const [isWindowsTauri] = useState(() => {
+  const [isTauriApp] = useState(() => {
     if (typeof window === "undefined")
       return false;
-    const isWin = typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent);
-    return isTauri() && isWin;
+    return isTauri();
   });
 
   const handleOpenAllScreens = (): void => {
@@ -42,7 +41,7 @@ export default function (): ReactElement {
 
   return (
     <VStack fontSize="2xl" gap="4" p="8">
-      {isWindowsTauri
+      {isTauriApp
         ? (
             <p.button
               cursor="pointer"
