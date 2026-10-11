@@ -1,7 +1,7 @@
 import { persistentAtom } from "@nanostores/persistent";
 import { type } from "arktype";
 import { atom } from "nanostores";
-import { getLocalStorageKey } from "@/lib/consts";
+import { EXTRA_PORTION_CONFIG, getLocalStorageKey } from "@/lib/consts";
 import { ItemGroup, ItemWithItemNumber } from "@/types/item";
 import ITEM_GROUPS from "~/data/item_groups.json";
 
@@ -125,7 +125,7 @@ function buildItems(soldOutIds: readonly string[]): ItemGroupWithItemNumber[] {
       ...data,
       children: data.children.map((child, itemIdx) => ({
         ...child,
-        itemNumber: child.name === "増量" ? 90 : groupIdx * 10 + itemIdx,
+        itemNumber: child.name === EXTRA_PORTION_CONFIG.name ? EXTRA_PORTION_CONFIG.code : groupIdx * 10 + itemIdx,
         isSoldOut: soldOutIds.includes(child.id),
       })),
     };

@@ -9,6 +9,7 @@ import { Expanded } from "@/components/atomic/Expanded";
 import { Table } from "@/components/atomic/Table";
 import { OrderStatusLabel } from "@/components/OrderStatusLabel";
 import { wrapValidation } from "@/lib/arktype";
+import { EXTRA_PORTION_CONFIG } from "@/lib/consts";
 import { ItemImpl } from "@/lib/item";
 import { DangoFlavorImpl, OrderStatusImpl, ReceiptNumberImpl } from "@/lib/order";
 import { $currentOrder, $depositAmount, $discountCode, $normalizedCurrentOrderItems, findDiscountByNumber } from "@/lib/stores/current-order";
@@ -61,7 +62,7 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
                         {flavor}
                       </p.span>
                     ))}
-                    {item.toppings?.includes("増量") === true && (
+                    {item.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true && (
                       <p.span
                         bg="orange.500"
                         borderRadius="sm"

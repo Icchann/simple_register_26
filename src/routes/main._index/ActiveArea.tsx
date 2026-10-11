@@ -9,7 +9,7 @@ import { Dialog } from "@/components/atomic/Dialog";
 import { Expanded } from "@/components/atomic/Expanded";
 import { MenuDialog } from "@/components/overlays/MenuDialog";
 import { focusReceiptInput } from "@/lib/focus-manager";
-import { $currentOrder, resetCurrentOrder } from "@/lib/stores/current-order";
+import { $currentOrder, resetCurrentOrder, toggleRefundMode } from "@/lib/stores/current-order";
 import { $isFlavorDialogOpen, $overlayType, closeOverlay, showOverlay } from "@/lib/stores/overlay";
 import { $orderPhase } from "@/lib/stores/phase";
 import { $status, setStatusWithTimeout } from "@/lib/stores/status";
@@ -58,13 +58,30 @@ export function ActiveArea(): ReactElement {
         return;
       }
 
+      // [-] キーで返品モードの切り替え
+      if (event.key === "-" || event.keyCode === 109) {
+        if ($isFlavorDialogOpen.get()) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        const nextRefundMode = toggleRefundMode();
+        setStatusWithTimeout(
+          {
+            type: "REFUND_MODE_CHANGED",
+            isRefund: nextRefundMode,
+          },
+          3000,
+        );
+        return;
+      }
+
       const overlayType = match(event)
         .with({ key: "/" }, { keyCode: 111 }, () => "COOKING_COMPLETE" as const)
         .with({ key: "*" }, () => "PICKUP_COMPLETE" as const)
-        .with({ key: "-" }, () => "ORDER_EDIT" as const)
         .with({ key: "+" }, () => "ITEM_EDIT" as const)
         .otherwise(() => null);
-
       if (overlayType !== null) {
         event.preventDefault();
         event.stopPropagation();

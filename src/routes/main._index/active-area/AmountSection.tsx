@@ -6,6 +6,7 @@ import { Button } from "@/components/atomic/Button";
 import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
+import { EXTRA_PORTION_CONFIG } from "@/lib/consts";
 import {
   focusOrderLastRowProduct,
   focusReceiptInput,
@@ -18,6 +19,7 @@ import {
   $depositAmount,
   $discountCode,
   $filledOrderRows,
+  $isRefundMode,
   findDiscountByNumber,
   findItemByNumber,
   getNormalizedCurrentOrderItems,
@@ -49,6 +51,7 @@ const TableBodyRow = p("tr", {
 });
 
 export function AmountSection(): ReactElement {
+  const isRefundMode = useStore($isRefundMode);
   const currentOrder = useStore($currentOrder);
   const orderId = currentOrder.orderId;
   const receiptNumber = currentOrder.receiptNumber;
@@ -72,7 +75,7 @@ export function AmountSection(): ReactElement {
   }, [discountCode]);
 
   // 合計金額と割引額の計算
-  const { totalDiscount, total } = useMemo(() => {
+  const { subtotal, total, totalDiscount } = useMemo(() => {
     let subtotalAmount = 0;
     let totalDiscountAmount = 0;
 
@@ -88,7 +91,7 @@ export function AmountSection(): ReactElement {
         continue;
 
       const quantity = Number.parseInt(row.quantity || "1", 10);
-      const toppingPrice = row.toppings?.includes("増量") === true ? 70 : 0;
+      const toppingPrice = row.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true ? EXTRA_PORTION_CONFIG.price : 0;
       subtotalAmount += (item.price + toppingPrice) * quantity;
       if (discountInfo) {
         const discountAmount = discountInfo.amount[item.id] ?? 0;
@@ -131,7 +134,7 @@ export function AmountSection(): ReactElement {
     dotPressedRef.current = false;
     let nextStep: RightStep = "DISCOUNT";
     if (orderPhase === "PROCESS_PAYMENT") {
-      nextStep = rightStep === "CONFIRM" ? "CONFIRM" : "DEPOSIT";
+      nextStep = isRefundMode ? "CONFIRM" : (rightStep === "CONFIRM" ? "CONFIRM" : "DEPOSIT");
     } else if (orderPhase === "CHECK_DISCOUNT") {
       nextStep = "DISCOUNT";
     }
@@ -139,7 +142,7 @@ export function AmountSection(): ReactElement {
       // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setRightStep(nextStep);
     }
-  }, [orderPhase, rightStep]);
+  }, [orderPhase, rightStep, isRefundMode]);
 
   useEffect(() => {
     if (orderPhase === "CHECK_DISCOUNT" && rightStep === "DISCOUNT") {
@@ -212,7 +215,7 @@ export function AmountSection(): ReactElement {
     }
 
     const orderItems: Array<Order["items"][number]> = activeItems.map((item) => {
-      const toppingPrice = item.toppings?.includes("増量") === true ? 70 : 0;
+      const toppingPrice = item.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true ? EXTRA_PORTION_CONFIG.price : 0;
       return {
         id: item.id,
         name: item.name,
@@ -227,13 +230,15 @@ export function AmountSection(): ReactElement {
     if (orderId != null && receiptNumber != null && createdAt != null) {
       const currentOrders = $orders.get();
 
-      // 預かり金額を数値に変換
+      // 預かり金額を数値に変換（返品時は返金額と同じ数値を自動補填）
       const cleanedDeposit = (depositAmount || "0").replace(/,/g, "");
-      const depositAmountNumber = Number.parseInt(cleanedDeposit, 10);
+      const depositAmountNumber = isRefundMode ? total : Number.parseInt(cleanedDeposit, 10);
 
-      const initialStatus = orderRequiresCooking(orderItems)
-        ? ("WAITING_COOKING" as const)
-        : ("WAITING_PICKUP" as const);
+      const initialStatus = isRefundMode
+        ? ("REFUNDED" as const)
+        : orderRequiresCooking(orderItems)
+          ? ("WAITING_COOKING" as const)
+          : ("WAITING_PICKUP" as const);
 
       const newOrder: Order = {
         id: Order.get("id").from(orderId),
@@ -283,7 +288,13 @@ export function AmountSection(): ReactElement {
   };
   return (
     <VStack alignItems="flex-start" gap="4" w="full">
-      <p.table tableLayout="fixed" w="full">
+      <p.table
+        borderColor={isRefundMode ? "red.500" : undefined}
+        borderRadius={isRefundMode ? "lg" : undefined}
+        borderWidth={isRefundMode ? "2px" : undefined}
+        tableLayout="fixed"
+        w="full"
+      >
         <Table.head>
           <p.tr>
             <p.th p="0!" w="28"></p.th>
@@ -291,17 +302,52 @@ export function AmountSection(): ReactElement {
           </p.tr>
         </Table.head>
         <Table.body>
-          <TableBodyRow bg="green.600" color="white">
+          <TableBodyRow bg={isRefundMode ? "red.600" : "green.600"} color="white">
             <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
-              合計
+              {isRefundMode ? "ご返金合計" : "合計"}
             </Table.cell>
             <Table.cell textAlign="right">
               <HStack gap="2" justifyContent="flex-end">
-                <p.code fontSize="clamp(1.2rem, 1.6vw, 1.5rem)">{total.toLocaleString("ja-JP")}</p.code>
+                <p.code fontSize="clamp(1.2rem, 1.6vw, 1.5rem)">
+                  {isRefundMode ? `-${total.toLocaleString("ja-JP")}` : total.toLocaleString("ja-JP")}
+                </p.code>
                 <p.p whiteSpace="nowrap">円</p.p>
               </HStack>
             </Table.cell>
           </TableBodyRow>
+          {isRefundMode && (
+            <p.tr bg="red.50">
+              <p.td colSpan={2} p="2">
+                <VStack
+                  alignItems="stretch"
+                  borderColor="red.300"
+                  borderRadius="md"
+                  borderWidth="1px"
+                  gap="1"
+                  p="2"
+                >
+                  <HStack color="red.700" fontSize="xs" fontWeight="bold" gap="1">
+                    <p.span>🔄</p.span>
+                    <p.span>【返金内容の確認】</p.span>
+                  </HStack>
+                  <HStack fontSize="xs" justifyContent="space-between">
+                    <p.span color="gray.600">返品小計:</p.span>
+                    <p.span fontWeight="bold">{`¥${subtotal.toLocaleString("ja-JP")}`}</p.span>
+                  </HStack>
+                  {totalDiscount > 0 && (
+                    <HStack color="red.600" fontSize="xs" justifyContent="space-between">
+                      <p.span>購入時割引控除:</p.span>
+                      <p.span fontWeight="bold">{`-¥${totalDiscount.toLocaleString("ja-JP")}`}</p.span>
+                    </HStack>
+                  )}
+                  <HStack borderColor="red.300" borderTop="1px dashed" justifyContent="space-between" mt="1" pt="1">
+                    <p.span color="red.800" fontWeight="bold">お客様への返金額:</p.span>
+                    <p.span color="red.700" fontSize="md" fontWeight="extrabold">{`¥${total.toLocaleString("ja-JP")}`}</p.span>
+                  </HStack>
+                </VStack>
+              </p.td>
+            </p.tr>
+          )}
           <TableBodyRow bg="red.200">
             <Table.cell align="right" verticalAlign="middle!" whiteSpace="nowrap">
               うち&ensp;割引
@@ -480,7 +526,8 @@ export function AmountSection(): ReactElement {
                       const depositNumber = Number.parseInt(cleanedValue, 10);
 
                       // 預かり金額が合計金額に足りない場合のバリデーション
-                      if (depositNumber < total) {
+                      // 通常モード時のみ、預かり金額が合計金額に足りない場合のバリデーション
+                      if (!isRefundMode && depositNumber < total) {
                         event.currentTarget.select();
                         setStatusWithTimeout(
                           {
@@ -520,9 +567,11 @@ export function AmountSection(): ReactElement {
       </p.table>
       <Button
         _focus={{
-          bg: "purple.500",
+          bg: isRefundMode ? "red.700" : "purple.500",
           color: "white",
         }}
+        bg={isRefundMode ? "red.600" : undefined}
+        color={isRefundMode ? "white" : undefined}
         data-register-focus="true"
         disabled={rightStep !== "CONFIRM"}
         mx="auto"
@@ -560,7 +609,7 @@ export function AmountSection(): ReactElement {
         ref={confirmButtonRef}
         variant="filled"
       >
-        注文確定 (注文確定 + 確定)
+        {isRefundMode ? "返金確定 (返金確定 + 確定)" : "注文確定 (注文確定 + 確定)"}
       </Button>
     </VStack>
   );

@@ -6,7 +6,7 @@ import { persistentAtom } from "@nanostores/persistent";
 import { computed } from "nanostores";
 import { err, ok } from "neverthrow";
 import { wrapValidation } from "@/lib/arktype";
-import { getLocalStorageKey } from "@/lib/consts";
+import { EXTRA_PORTION_CONFIG, getLocalStorageKey } from "@/lib/consts";
 import { ItemImpl } from "@/lib/item";
 import { ItemNumber as ItemNumberType } from "@/types/item";
 import { OrderItemAmount } from "@/types/order";
@@ -81,6 +81,18 @@ export const $depositAmount = persistentAtom<string>(
   coder,
 );
 
+export const $isRefundMode = persistentAtom<boolean>(
+  getLocalStorageKey("isRefundMode"),
+  false,
+  coder,
+);
+
+export function toggleRefundMode(): boolean {
+  const next = !$isRefundMode.get();
+  $isRefundMode.set(next);
+  return next;
+}
+
 const initialDepositAmount = $depositAmount.get();
 const sanitizedInitialDepositAmount = sanitizeNumericString(initialDepositAmount);
 if (sanitizedInitialDepositAmount !== initialDepositAmount) {
@@ -140,6 +152,7 @@ export function resetCurrentOrder(): void {
   $orderRows.set(createInitialRows());
   $discountCode.set("");
   $depositAmount.set("");
+  $isRefundMode.set(false);
 }
 
 export function getFilledOrderRows(rows: OrderRowInput[] = $orderRows.get()): OrderRowInput[] {
@@ -280,7 +293,7 @@ export function validateExtraPortion(
       continue;
     }
     const group = ItemImpl(item).getGroup();
-    if (item.name === "増量" || item.toppings?.includes("増量") === true) {
+    if (item.name === EXTRA_PORTION_CONFIG.name || item.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true) {
       extraCount += item.amount;
     }
     if (group?.name === "だんご" && item.name !== "増量") {

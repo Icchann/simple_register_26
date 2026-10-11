@@ -2,12 +2,14 @@
 import type { ReactElement, RefObject } from "react";
 import type { OrderRowInput } from "@/lib/stores/current-order";
 import { useStore } from "@nanostores/react";
-import { styled as p } from "panda/jsx";
+import { HStack, styled as p, VStack } from "panda/jsx";
 import { createRef, useEffect, useMemo, useRef, useState } from "react";
 
+import { Button } from "@/components/atomic/Button";
 import { Table } from "@/components/atomic/Table";
 import { DangoFlavorDialog } from "@/components/overlays/DangoFlavorDialog";
 import { wrapValidation } from "@/lib/arktype";
+import { EXTRA_PORTION_CONFIG } from "@/lib/consts";
 import {
   focusReceiptInput,
   registerOrderFocusHelpers,
@@ -17,6 +19,7 @@ import { DANGO_FLAVORS } from "@/lib/order";
 import {
   $currentOrder,
   $discountCode,
+  $isRefundMode,
   $orderRows,
   appendOrderRow,
   createOrderRow,
@@ -60,6 +63,8 @@ export function OrderTable(): ReactElement {
     displayIndex: number;
     isTab: boolean;
   }>({ isOpen: false, rowId: -1, displayIndex: 0, isTab: false });
+
+  const [toppingErrorDialogMessage, setToppingErrorDialogMessage] = useState<string | null>(null);
   const discountInfo = useMemo(() => {
     if (!discountCode || discountCode.trim() === "") {
       return null;
@@ -356,7 +361,7 @@ export function OrderTable(): ReactElement {
             return;
           }
           const isDango = ItemImpl(item).getGroup()?.name === "だんご";
-          const isExtraPortion = item.name === "増量" || itemNumber === 90;
+          const isExtraPortion = item.name === EXTRA_PORTION_CONFIG.name || itemNumber === EXTRA_PORTION_CONFIG.code;
 
           if (isExtraPortion) {
             event.preventDefault();
@@ -390,6 +395,17 @@ export function OrderTable(): ReactElement {
                 detail: { type: "EXTRA_PORTION_WITHOUT_ITEM" },
                 receiptNumber: $currentOrder.get().receiptNumber,
               });
+              return;
+            }
+
+            const targetDangoRow = currentRows[precedingDangoIndex];
+            const rawQuantity = targetDangoRow?.quantity;
+            const dangoQuantity = Number.parseInt(rawQuantity != null && rawQuantity !== "" ? rawQuantity : "1", 10);
+            if (dangoQuantity > 1) {
+              event.currentTarget.select();
+              setToppingErrorDialogMessage(
+                "増量を付ける場合は、1本ずつ行を分けて入力してください。\n（例: みたらし 1本 ＋ 増量、みたらし 1本）",
+              );
               return;
             }
 
@@ -615,8 +631,32 @@ export function OrderTable(): ReactElement {
     });
   };
 
+  const isRefundMode = useStore($isRefundMode);
+
   return (
     <>
+      {isRefundMode && (
+        <HStack
+          bg="red.600"
+          borderRadius="md"
+          color="white"
+          fontSize="xs"
+          fontWeight="bold"
+          justifyContent="space-between"
+          mb="1"
+          px="3"
+          py="1"
+          w="full"
+        >
+          <HStack gap="1">
+            <p.span fontSize="sm">🔄</p.span>
+            <p.span>【返品・返金モード中】入力した商品はマイナス（返金）として登録されます</p.span>
+          </HStack>
+          <p.span bg="red.700" borderRadius="sm" px="1.5" py="0.5">
+            [-] キーで通常モードに戻る
+          </p.span>
+        </HStack>
+      )}
       <p.table fontSize="clamp(11px, 0.85vw, 14px)" ref={tableRef} tableLayout="fixed" w="full">
         <Table.head>
           <p.tr>
@@ -639,6 +679,7 @@ export function OrderTable(): ReactElement {
               discountAmount={getDiscountAmountForRow(row.productCode) * Number.parseInt(row.quantity ?? "1", 10)}
               flavors={row.flavors}
               index={index + 1}
+              isRefund={isRefundMode}
               key={row.id}
               onChange={(field: KeyField, value: string) => {
                 handleChange(row.id, field, value);
@@ -667,6 +708,50 @@ export function OrderTable(): ReactElement {
           handleFlavorConfirm(flavorDialogState.rowId, flavors, flavorDialogState.displayIndex, flavorDialogState.isTab);
         }}
       />
+      {toppingErrorDialogMessage != null && (
+        <p.div
+          alignItems="center"
+          bg="black/60"
+          bottom="0"
+          display="flex"
+          justifyContent="center"
+          left="0"
+          position="fixed"
+          right="0"
+          top="0"
+          zIndex="modal"
+        >
+          <VStack
+            bg="white"
+            borderColor="red.500"
+            borderRadius="xl"
+            borderWidth="2px"
+            boxShadow="2xl"
+            gap="4"
+            maxW="480px"
+            p="6"
+            w="90%"
+          >
+            <HStack color="red.600" fontSize="lg" fontWeight="bold" gap="2">
+              <p.span fontSize="xl">⚠️</p.span>
+              <p.span>増量の入力エラー</p.span>
+            </HStack>
+            <p.p color="gray.800" fontSize="sm" fontWeight="bold" lineHeight="relaxed" textAlign="center" whiteSpace="pre-wrap">
+              {toppingErrorDialogMessage}
+            </p.p>
+            <Button
+              autoFocus
+              onClick={() => {
+                setToppingErrorDialogMessage(null);
+              }}
+              size="md"
+              variant="filled"
+            >
+              閉じる (Enter)
+            </Button>
+          </VStack>
+        </p.div>
+      )}
     </>
   );
 }

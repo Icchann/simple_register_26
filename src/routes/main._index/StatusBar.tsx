@@ -273,6 +273,13 @@ function Status(): ReactElement {
         </HStack>
       </HStack>
     ))
+    .with({ type: "REFUND_MODE_CHANGED" }, ({ isRefund }) => (
+      <HStack bg={isRefund ? "red.600" : "blue.600"} color="white" gap="1" h="full" px="2">
+        <HStack gap="1" fontWeight="bold">
+          <p.p>{isRefund ? "【🔄 返品・返金モード】に切り替えました（金額がマイナス登録されます）" : "【通常モード】に戻りました"}</p.p>
+        </HStack>
+      </HStack>
+    ))
     .otherwise(() => <></>);
 }
 

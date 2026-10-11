@@ -74,6 +74,10 @@ export type Status
   | {
     type: "PICKUP_COMPLETED";
     receiptNumber: number;
+  }
+  | {
+    type: "REFUND_MODE_CHANGED";
+    isRefund: boolean;
   };
 
 export const $status = atom<Nullable<Status>>();

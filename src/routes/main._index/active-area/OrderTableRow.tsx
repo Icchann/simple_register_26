@@ -9,6 +9,7 @@ import { match, P } from "ts-pattern";
 import { NumberInput } from "@/components/atomic/NumberInput";
 import { Table } from "@/components/atomic/Table";
 import { wrapValidation } from "@/lib/arktype";
+import { EXTRA_PORTION_CONFIG } from "@/lib/consts";
 import { ItemImpl } from "@/lib/item";
 import { DangoFlavorImpl } from "@/lib/order";
 import { findItemByNumber } from "@/lib/stores/current-order";
@@ -21,12 +22,14 @@ function ItemName(
     isBlank,
     flavors,
     toppings,
+    isRefund,
   }:
   {
     itemWithItemNumber: Nullable<ItemWithItemNumber>;
     isBlank: boolean;
     flavors?: string[] | undefined;
     toppings?: string[] | undefined;
+    isRefund?: boolean | undefined;
   },
 ): ReactElement {
   const phase = useStore($orderPhase);
@@ -60,6 +63,20 @@ function ItemName(
       {flavors && flavors.length > 0
         ? (
             <HStack alignItems="center" display="inline-flex" flexWrap="nowrap" gap="1">
+              {isRefund === true && (
+                <p.span
+                  bg="red.600"
+                  borderRadius="sm"
+                  color="white"
+                  fontSize="clamp(9px, 0.75vw, 11px)"
+                  fontWeight="bold"
+                  px="1"
+                  py="0.5"
+                  whiteSpace="nowrap"
+                >
+                  [返品]
+                </p.span>
+              )}
               <p.span>だんご</p.span>
               {flavors.map((flavor) => (
                 <p.span
@@ -72,7 +89,7 @@ function ItemName(
                   {flavor}
                 </p.span>
               ))}
-              {toppings?.includes("増量") === true && (
+              {toppings?.includes(EXTRA_PORTION_CONFIG.name) === true && (
                 <p.span
                   bg="orange.500"
                   borderRadius="sm"
@@ -83,15 +100,35 @@ function ItemName(
                   py="0.5"
                   whiteSpace="nowrap"
                 >
-                  [増量]
+                  {`[${EXTRA_PORTION_CONFIG.name}]`}
                 </p.span>
               )}
             </HStack>
           )
-        : match(ItemImpl(itemWithItemNumber).getGroup()?.name)
-          .with(P.nullish, () => "")
-          .otherwise((name) => `${name}/`)
-          + itemWithItemNumber.name}
+        : (
+            <HStack alignItems="center" display="inline-flex" flexWrap="nowrap" gap="1">
+              {isRefund === true && (
+                <p.span
+                  bg="red.600"
+                  borderRadius="sm"
+                  color="white"
+                  fontSize="clamp(9px, 0.75vw, 11px)"
+                  fontWeight="bold"
+                  px="1"
+                  py="0.5"
+                  whiteSpace="nowrap"
+                >
+                  [返品]
+                </p.span>
+              )}
+              <p.span>
+                {match(ItemImpl(itemWithItemNumber).getGroup()?.name)
+                  .with(P.nullish, () => "")
+                  .otherwise((name) => `${name}/`)
+                  + itemWithItemNumber.name}
+              </p.span>
+            </HStack>
+          )}
     </p.div>
   );
 }
@@ -102,6 +139,7 @@ export const OrderTableRow = memo((
     discountAmount: number;
     flavors?: string[] | undefined;
     toppings?: string[] | undefined;
+    isRefund?: boolean | undefined;
     index: number;
     productCode: string;
     quantity: string;
@@ -156,13 +194,14 @@ export const OrderTableRow = memo((
         <ItemName
           flavors={props.flavors}
           isBlank={props.productCode.trim() === "" && props.quantity.trim() === ""}
+          isRefund={props.isRefund}
           itemWithItemNumber={itemInfo}
           toppings={props.toppings}
         />
       </Table.cell>
       <Table.cell align="right" whiteSpace="nowrap">
         {itemInfo?.price != null
-          ? `@${itemInfo.price + (props.toppings?.includes("増量") === true ? 70 : 0)}`
+          ? `@${itemInfo.price + (props.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true ? EXTRA_PORTION_CONFIG.price : 0)}`
           : "---"}
       </Table.cell>
       <Table.cell align="right" whiteSpace="nowrap">
@@ -191,9 +230,9 @@ export const OrderTableRow = memo((
       <Table.cell align="right" color={props.discountAmount > 0 ? "red.600" : undefined} whiteSpace="nowrap">
         {props.discountAmount > 0 ? `-${props.discountAmount}` : "0"}
       </Table.cell>
-      <Table.cell align="right" whiteSpace="nowrap">
+      <Table.cell align="right" color={props.isRefund === true ? "red.600" : undefined} fontWeight={props.isRefund === true ? "bold" : undefined} whiteSpace="nowrap">
         {itemInfo && props.quantity
-          ? ((itemInfo.price + (props.toppings?.includes("増量") === true ? 70 : 0)) * Number.parseInt(props.quantity ?? "0", 10) - props.discountAmount)
+          ? `${props.isRefund === true ? "-" : ""}${((itemInfo.price + (props.toppings?.includes(EXTRA_PORTION_CONFIG.name) === true ? EXTRA_PORTION_CONFIG.price : 0)) * Number.parseInt(props.quantity ?? "0", 10) - props.discountAmount)}`
           : "0"}
       </Table.cell>
     </p.tr>
