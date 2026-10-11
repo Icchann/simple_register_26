@@ -217,7 +217,20 @@ export function OrderTable(): ReactElement {
 
   const handleChange = (rowId: number, field: KeyField, value: string): void => {
     updateOrderRows((previousRows) =>
-      previousRows.map((row) => row.id === rowId ? { ...row, [field]: value } : row),
+      previousRows.map((row) => {
+        if (row.id !== rowId) {
+          return row;
+        }
+        if (field === "productCode") {
+          return {
+            ...row,
+            productCode: value,
+            flavors: undefined,
+            toppings: undefined,
+          };
+        }
+        return { ...row, [field]: value };
+      }),
     );
   };
 
@@ -513,7 +526,13 @@ export function OrderTable(): ReactElement {
         event.preventDefault();
         updateOrderRows((previousRows) =>
           previousRows.map((candidate) =>
-            candidate.id === row.id ? { ...candidate, [field]: "" } : candidate,
+            candidate.id === row.id
+              ? {
+                  ...candidate,
+                  [field]: "",
+                  ...(field === "productCode" ? { flavors: undefined, toppings: undefined } : {}),
+                }
+              : candidate,
           ),
         );
         return;
@@ -535,7 +554,13 @@ export function OrderTable(): ReactElement {
         }
 
         const clearedRows = previousRows.map((candidate, idx) =>
-          idx === index ? { ...candidate, [field]: "" } : candidate,
+          idx === index
+            ? {
+                ...candidate,
+                [field]: "",
+                ...(field === "productCode" ? { flavors: undefined, toppings: undefined } : {}),
+              }
+            : candidate,
         );
 
         const allEmpty = clearedRows.every(isRowEmpty);
@@ -582,7 +607,8 @@ export function OrderTable(): ReactElement {
           syncedProductCode = matched.code;
         }
       } else if (flavors.length > 1) {
-        syncedProductCode = "00";
+        // 2種選択時は元の団子コードを維持し味なし00への意図しない上書きを防止
+        syncedProductCode = targetRow.productCode;
       }
 
       nextRows[index] = {

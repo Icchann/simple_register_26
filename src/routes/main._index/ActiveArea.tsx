@@ -9,7 +9,7 @@ import { Dialog } from "@/components/atomic/Dialog";
 import { Expanded } from "@/components/atomic/Expanded";
 import { MenuDialog } from "@/components/overlays/MenuDialog";
 import { focusReceiptInput } from "@/lib/focus-manager";
-import { $currentOrder, resetCurrentOrder, toggleRefundMode } from "@/lib/stores/current-order";
+import { $currentOrder, $filledOrderRows, resetCurrentOrder, toggleRefundMode } from "@/lib/stores/current-order";
 import { $isFlavorDialogOpen, $overlayType, closeOverlay, showOverlay } from "@/lib/stores/overlay";
 import { $orderPhase } from "@/lib/stores/phase";
 import { $status, setStatusWithTimeout } from "@/lib/stores/status";
@@ -66,6 +66,11 @@ export function ActiveArea(): ReactElement {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
+        // 混在防止: 既に商品が入力されている場合は伝票をリセットして安全にモード切替
+        if ($filledOrderRows.get().length > 0) {
+          resetCurrentOrder();
+          $orderPhase.set("SELECT_ITEMS");
+        }
         const nextRefundMode = toggleRefundMode();
         setStatusWithTimeout(
           {
@@ -156,6 +161,9 @@ export function ActiveArea(): ReactElement {
       longPressTriggeredRef.current = true;
       resetCompletedRef.current = true;
       clearProgressInterval();
+      $isFlavorDialogOpen.set(false);
+      menuDialogRef.current?.close();
+      closeOverlay();
       resetCurrentOrder();
       $orderPhase.set("CHECK_RECEIPT_NUMBER");
       requestAnimationFrame(() => {
