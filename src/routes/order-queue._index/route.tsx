@@ -13,7 +13,7 @@ export default function (): ReactElement {
       <OrderQueue
         // cspell: disable-next-line
         filterGroupId="bf8hypkw4ahz8t6bv3i0o0ot"
-        filterStatus={["WAITING_COOKING", "UNCONFIRMED"]}
+        filterStatus="WAITING_COOKING"
         size="large"
         visibleColumns={{
           receiptNumber: true,

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { PickupMonitor } from "@/components/PickupMonitor";
+import { CustomerMonitor } from "@/components/CustomerMonitor";
 
 export default function (): ReactElement {
-  return <PickupMonitor basedOn="screen" isHighlightLonger size="large" />;
+  return <CustomerMonitor />;
 }

@@ -192,7 +192,7 @@ export function DangoFlavorDialog({
 
   const promptMessage = firstFlavor == null
     ? "1つ目の味を選んでください (0: 味なし / 1〜4: 各種味 / [後退] 戻る)"
-    : "2つ目の味を選んでください (1味のみで確定は [確定] / 0〜4: 味選択 / [後退] 戻る)";
+    : "✨ もう一つの味は？（2種類まで選べます！ 1味のみで決定する場合は同じ番号または [確定]）";
   return (
     <p.div
       bottom="0"
@@ -239,11 +239,11 @@ export function DangoFlavorDialog({
 
         {/* 案内メッセージ */}
         <p.p
-          bg="blue.50"
-          borderColor="blue.200"
+          bg={firstFlavor != null ? "amber.50" : "blue.50"}
+          borderColor={firstFlavor != null ? "amber.300" : "blue.200"}
           borderRadius="sm"
           borderWidth="1px"
-          color="blue.900"
+          color={firstFlavor != null ? "amber.950" : "blue.900"}
           fontSize="sm"
           fontWeight="bold"
           p="2"
@@ -288,9 +288,25 @@ export function DangoFlavorDialog({
                     {secondFlavor}
                   </p.span>
                 )
-              : (
-                  <p.span color="gray.400" fontSize="sm">[ 未選択 ]</p.span>
-                )}
+              : firstFlavor != null
+                ? (
+                    <p.span
+                      bg="amber.100"
+                      borderColor="amber.400"
+                      borderRadius="sm"
+                      borderWidth="1px"
+                      color="amber.900"
+                      fontSize="sm"
+                      fontWeight="bold"
+                      px="2"
+                      py="0.5"
+                    >
+                      👉 もう一つの味は？
+                    </p.span>
+                  )
+                : (
+                    <p.span color="gray.400" fontSize="sm">[ 未選択 ]</p.span>
+                  )}
           </HStack>
         </HStack>
 

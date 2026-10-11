@@ -26,6 +26,7 @@ import {
   $lastStatusChangedReceiptNumber,
   $orders,
 } from "@/lib/stores/orders";
+import { $orderPhase } from "@/lib/stores/phase";
 import { dateToStr } from "@/lib/time";
 import { Discount, DiscountNumber } from "@/types/item";
 import { Order } from "@/types/order";
@@ -437,7 +438,15 @@ const UnconfirmedOrderPreview = memo(
     const depositAmount = useStore($depositAmount);
     const items = useStore($items);
     const discountCode = useStore($discountCode);
+    const orderPhase = useStore($orderPhase);
 
+    const isActivePhase = orderPhase === "SELECT_ITEMS"
+      || orderPhase === "CHECK_DISCOUNT"
+      || orderPhase === "PROCESS_PAYMENT";
+
+    if (!isActivePhase) {
+      return null;
+    }
     // ステータスフィルターチェック（UNCONFIRMEDが含まれているかチェック）
     if (filterStatus != null) {
       const allowUnconfirmed = Array.isArray(filterStatus)

@@ -100,7 +100,7 @@ export default function (): ReactElement {
     const screens = [
       { label: "main-window", title: "メインレジ", url: "/main" },
       { label: "order-queue-window", title: "調理キュー", url: "/order-queue" },
-      { label: "pickup-monitor-window", title: "受取モニター", url: "/pickup-monitor" },
+      { label: "customer-monitor-window", title: "シス研団子", url: "/customer-monitor" },
     ];
 
     screens.forEach(({ label, title, url }) => {
@@ -144,14 +144,14 @@ export default function (): ReactElement {
               fontWeight="bold"
               onClick={handleOpenAllScreens}
             >
-              3画面を同時に開く (main / order-queue / pickup-monitor)
+              3画面を同時に開く (main / order-queue / customer-monitor [シス研団子])
             </p.button>
           )
         : (
             <>
               <p.a href="/main">main</p.a>
               <p.a href="/order-queue">order-queue</p.a>
-              <p.a href="/pickup-monitor">pickup-monitor</p.a>
+              <p.a href="/customer-monitor">customer-monitor (シス研団子)</p.a>
             </>
           )}
 
