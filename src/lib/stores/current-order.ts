@@ -23,6 +23,7 @@ export type OrderRowInput = {
   productCode: string;
   quantity: string;
   flavors?: string[] | undefined;
+  toppings?: string[] | undefined;
 };
 
 export type CurrentOrderState = {
@@ -208,16 +209,24 @@ export function getNormalizedCurrentOrderItems(
       ? Array.from(new Set(row.flavors)).slice(0, 2)
       : undefined;
 
+    // トッピングの正規化
+    const normalizedToppings = row.toppings && row.toppings.length > 0
+      ? Array.from(new Set(row.toppings))
+      : undefined;
+
     const item: typeof Item.infer & { itemNumber: ItemNumber } = {
       ...baseItem,
       ...(normalizedFlavors && normalizedFlavors.length > 0 ? { flavors: normalizedFlavors } : {}),
+      ...(normalizedToppings && normalizedToppings.length > 0 ? { toppings: normalizedToppings } : {}),
     };
 
     const flavorKey = normalizedFlavors && normalizedFlavors.length > 0
       ? [...normalizedFlavors].sort().join(",")
       : "";
-    const mapKey = `${item.id}:${flavorKey}`;
-
+    const toppingKey = normalizedToppings && normalizedToppings.length > 0
+      ? [...normalizedToppings].sort().join(",")
+      : "";
+    const mapKey = `${item.id}:${flavorKey}:${toppingKey}`;
     const existing = itemMap.get(mapKey);
     if (existing) {
       existing.totalAmount += quantity;
@@ -271,9 +280,10 @@ export function validateExtraPortion(
       continue;
     }
     const group = ItemImpl(item).getGroup();
-    if (item.name === "増量") {
+    if (item.name === "増量" || item.toppings?.includes("増量") === true) {
       extraCount += item.amount;
-    } else if (group?.name === "だんご") {
+    }
+    if (group?.name === "だんご" && item.name !== "増量") {
       dangoCount += item.amount;
     }
   }

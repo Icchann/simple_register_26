@@ -125,7 +125,7 @@ function buildItems(soldOutIds: readonly string[]): ItemGroupWithItemNumber[] {
       ...data,
       children: data.children.map((child, itemIdx) => ({
         ...child,
-        itemNumber: groupIdx * 10 + itemIdx,
+        itemNumber: child.name === "増量" ? 90 : groupIdx * 10 + itemIdx,
         isSoldOut: soldOutIds.includes(child.id),
       })),
     };

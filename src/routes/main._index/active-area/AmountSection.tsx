@@ -88,8 +88,8 @@ export function AmountSection(): ReactElement {
         continue;
 
       const quantity = Number.parseInt(row.quantity || "1", 10);
-      subtotalAmount += item.price * quantity;
-
+      const toppingPrice = row.toppings?.includes("増量") === true ? 70 : 0;
+      subtotalAmount += (item.price + toppingPrice) * quantity;
       if (discountInfo) {
         const discountAmount = discountInfo.amount[item.id] ?? 0;
         totalDiscountAmount += discountAmount * quantity;
@@ -211,13 +211,17 @@ export function AmountSection(): ReactElement {
       return;
     }
 
-    const orderItems: Array<Order["items"][number]> = activeItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      amount: item.amount,
-      ...(item.flavors && item.flavors.length > 0 ? { flavors: item.flavors } : {}),
-    }));
+    const orderItems: Array<Order["items"][number]> = activeItems.map((item) => {
+      const toppingPrice = item.toppings?.includes("増量") === true ? 70 : 0;
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price + toppingPrice,
+        amount: item.amount,
+        ...(item.flavors && item.flavors.length > 0 ? { flavors: item.flavors } : {}),
+        ...(item.toppings && item.toppings.length > 0 ? { toppings: item.toppings } : {}),
+      };
+    });
 
     // 新しい注文を作成して $orders に追加
     if (orderId != null && receiptNumber != null && createdAt != null) {

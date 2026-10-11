@@ -13,6 +13,7 @@ export const Item = type({
   "name": "string",
   "price": Price,
   "flavors?": "string[]",
+  "toppings?": "string[]",
   "isSoldOut?": "boolean",
 });
 export type Item = typeof Item.infer;

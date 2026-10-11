@@ -20,11 +20,13 @@ function ItemName(
     itemWithItemNumber,
     isBlank,
     flavors,
+    toppings,
   }:
   {
     itemWithItemNumber: Nullable<ItemWithItemNumber>;
     isBlank: boolean;
     flavors?: string[] | undefined;
+    toppings?: string[] | undefined;
   },
 ): ReactElement {
   const phase = useStore($orderPhase);
@@ -59,26 +61,31 @@ function ItemName(
         ? (
             <HStack alignItems="center" display="inline-flex" flexWrap="nowrap" gap="1">
               <p.span>だんご</p.span>
-              {flavors.map((flavor) => {
-                const color = DangoFlavorImpl(flavor).toColor();
-                return (
-                  <p.span
-                    bg={color.bg}
-                    borderColor={color.borderColor}
-                    borderRadius="sm"
-                    borderWidth="1px"
-                    color={color.color}
-                    fontSize="clamp(10px, 0.8vw, 12px)"
-                    fontWeight="bold"
-                    key={flavor}
-                    px="1"
-                    py="0.5"
-                    whiteSpace="nowrap"
-                  >
-                    {flavor}
-                  </p.span>
-                );
-              })}
+              {flavors.map((flavor) => (
+                <p.span
+                  className={DangoFlavorImpl(flavor).toClassName()}
+                  fontSize="clamp(10px, 0.8vw, 12px)"
+                  key={flavor}
+                  px="1"
+                  py="0.5"
+                >
+                  {flavor}
+                </p.span>
+              ))}
+              {toppings?.includes("増量") === true && (
+                <p.span
+                  bg="orange.500"
+                  borderRadius="sm"
+                  color="white"
+                  fontSize="clamp(10px, 0.8vw, 12px)"
+                  fontWeight="bold"
+                  px="1"
+                  py="0.5"
+                  whiteSpace="nowrap"
+                >
+                  [増量]
+                </p.span>
+              )}
             </HStack>
           )
         : match(ItemImpl(itemWithItemNumber).getGroup()?.name)
@@ -94,6 +101,7 @@ export const OrderTableRow = memo((
     disabled: boolean;
     discountAmount: number;
     flavors?: string[] | undefined;
+    toppings?: string[] | undefined;
     index: number;
     productCode: string;
     quantity: string;
@@ -149,10 +157,13 @@ export const OrderTableRow = memo((
           flavors={props.flavors}
           isBlank={props.productCode.trim() === "" && props.quantity.trim() === ""}
           itemWithItemNumber={itemInfo}
+          toppings={props.toppings}
         />
       </Table.cell>
       <Table.cell align="right" whiteSpace="nowrap">
-        {itemInfo?.price != null ? `@${itemInfo.price}` : "---"}
+        {itemInfo?.price != null
+          ? `@${itemInfo.price + (props.toppings?.includes("増量") === true ? 70 : 0)}`
+          : "---"}
       </Table.cell>
       <Table.cell align="right" whiteSpace="nowrap">
         <HStack>
@@ -182,7 +193,7 @@ export const OrderTableRow = memo((
       </Table.cell>
       <Table.cell align="right" whiteSpace="nowrap">
         {itemInfo && props.quantity
-          ? (itemInfo.price * Number.parseInt(props.quantity ?? "0", 10) - props.discountAmount)
+          ? ((itemInfo.price + (props.toppings?.includes("増量") === true ? 70 : 0)) * Number.parseInt(props.quantity ?? "0", 10) - props.discountAmount)
           : "0"}
       </Table.cell>
     </p.tr>

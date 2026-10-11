@@ -356,9 +356,70 @@ export function OrderTable(): ReactElement {
             return;
           }
           const isDango = ItemImpl(item).getGroup()?.name === "だんご";
-          const isExtraPortion = item.name === "増量";
+          const isExtraPortion = item.name === "増量" || itemNumber === 90;
 
-          if (isDango && !isExtraPortion) {
+          if (isExtraPortion) {
+            event.preventDefault();
+            const currentRows = $orderRows.get();
+            const currentRowIndex = currentRows.findIndex((r) => r.id === row.id);
+
+            // 現在の行より前（または直近）にある「だんご」行を探す
+            let precedingDangoIndex = -1;
+            for (let i = currentRowIndex - 1; i >= 0; i--) {
+              const r = currentRows[i];
+              if (!r) {
+                continue;
+              }
+              const parsedNumber = wrapValidation(
+                ItemNumber(Number.parseInt(r.productCode, 10)),
+              ).unwrapOr(null);
+              if (parsedNumber == null) {
+                continue;
+              }
+              const it = findItemByNumber(parsedNumber);
+              if (it && ItemImpl(it).getGroup()?.name === "だんご" && it.name !== "増量") {
+                precedingDangoIndex = i;
+                break;
+              }
+            }
+
+            if (precedingDangoIndex === -1) {
+              event.currentTarget.select();
+              setStatusWithTimeout({
+                type: "INVALID_VALUE",
+                detail: { type: "EXTRA_PORTION_WITHOUT_ITEM" },
+                receiptNumber: $currentOrder.get().receiptNumber,
+              });
+              return;
+            }
+
+            updateOrderRows((previousRows) => {
+              const nextRows = [...previousRows];
+              const targetDango = nextRows[precedingDangoIndex];
+              if (targetDango) {
+                const currentToppings = targetDango.toppings ?? [];
+                nextRows[precedingDangoIndex] = {
+                  ...targetDango,
+                  toppings: Array.from(new Set([...currentToppings, "増量"])),
+                };
+              }
+
+              const curIdx = nextRows.findIndex((r) => r.id === row.id);
+              if (curIdx !== -1) {
+                nextRows[curIdx] = {
+                  ...nextRows[curIdx]!,
+                  productCode: "",
+                  quantity: "",
+                };
+              }
+              return nextRows;
+            });
+
+            event.currentTarget.value = "";
+            return;
+          }
+
+          if (isDango) {
             const initialFlavor = item.name === "だんご" ? "味なし" : item.name;
             event.preventDefault();
             setFlavorDialogState({
@@ -592,6 +653,7 @@ export function OrderTable(): ReactElement {
               productCodeRef={rowRefs[index]?.productCode}
               quantity={row.quantity}
               quantityRef={rowRefs[index]?.quantity}
+              toppings={row.toppings}
             />
           ))}
         </Table.body>

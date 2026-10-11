@@ -1,10 +1,71 @@
 import type { ReactElement } from "react";
 import { useStore } from "@nanostores/react";
+import { cva } from "panda/css";
 import { HStack, styled as p, VStack } from "panda/jsx";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { match } from "ts-pattern";
 import { DANGO_FLAVORS, DangoFlavorImpl } from "@/lib/order";
 import { $items } from "@/lib/stores/items";
 import { $isFlavorDialogOpen } from "@/lib/stores/overlay";
+
+const flavorCardRecipe = cva({
+  base: {
+    borderRadius: "md",
+    borderWidth: "2px",
+    gap: "3",
+    p: "3",
+    position: "relative",
+  },
+  variants: {
+    state: {
+      soldOut: {
+        bg: "red.50",
+        borderColor: "red.300",
+        cursor: "not-allowed",
+        opacity: 0.6,
+      },
+      normal: {
+        bg: "gray.50",
+        borderColor: "gray.200",
+        cursor: "pointer",
+        opacity: 1,
+      },
+      amber: {
+        bg: "amber.100",
+        borderColor: "amber.400",
+        cursor: "pointer",
+        opacity: 1,
+      },
+      orange: {
+        bg: "orange.100",
+        borderColor: "orange.400",
+        cursor: "pointer",
+        opacity: 1,
+      },
+      purple: {
+        bg: "purple.100",
+        borderColor: "purple.400",
+        cursor: "pointer",
+        opacity: 1,
+      },
+      emerald: {
+        bg: "emerald.100",
+        borderColor: "emerald.400",
+        cursor: "pointer",
+        opacity: 1,
+      },
+      gray: {
+        bg: "gray.200",
+        borderColor: "gray.400",
+        cursor: "pointer",
+        opacity: 1,
+      },
+    },
+  },
+  defaultVariants: {
+    state: "normal",
+  },
+});
 
 export type DangoFlavorDialogProps = {
   isOpen: boolean;
@@ -199,13 +260,8 @@ export function DangoFlavorDialog({
             {firstFlavor != null
               ? (
                   <p.span
-                    bg={DangoFlavorImpl(firstFlavor).toColor().bg}
-                    borderColor={DangoFlavorImpl(firstFlavor).toColor().borderColor}
-                    borderRadius="sm"
-                    borderWidth="1px"
-                    color={DangoFlavorImpl(firstFlavor).toColor().color}
+                    className={DangoFlavorImpl(firstFlavor).toClassName()}
                     fontSize="sm"
-                    fontWeight="bold"
                     px="2"
                     py="0.5"
                   >
@@ -224,13 +280,8 @@ export function DangoFlavorDialog({
             {secondFlavor != null
               ? (
                   <p.span
-                    bg={DangoFlavorImpl(secondFlavor).toColor().bg}
-                    borderColor={DangoFlavorImpl(secondFlavor).toColor().borderColor}
-                    borderRadius="sm"
-                    borderWidth="1px"
-                    color={DangoFlavorImpl(secondFlavor).toColor().color}
+                    className={DangoFlavorImpl(secondFlavor).toClassName()}
                     fontSize="sm"
-                    fontWeight="bold"
                     px="2"
                     py="0.5"
                   >
@@ -248,16 +299,20 @@ export function DangoFlavorDialog({
           {DANGO_FLAVORS.map((flavor) => {
             const isSoldOut = isFlavorSoldOut(flavor.name);
             const isSelected = firstFlavor === flavor.name || secondFlavor === flavor.name;
-            const colors = DangoFlavorImpl(flavor.name).toColor();
+            const cardState = isSoldOut
+              ? ("soldOut" as const)
+              : isSelected
+                ? match(flavor.name)
+                    .with("きなこ", () => "amber" as const)
+                    .with("みたらし", () => "orange" as const)
+                    .with("あんこ", () => "purple" as const)
+                    .with("のり醤油", () => "emerald" as const)
+                    .otherwise(() => "gray" as const)
+                : ("normal" as const);
 
             return (
               <HStack
-                bg={isSoldOut ? "red.50" : isSelected ? colors.bg : "gray.50"}
-                borderColor={isSoldOut ? "red.300" : isSelected ? colors.borderColor : "gray.200"}
-                borderRadius="md"
-                borderWidth="2px"
-                cursor={isSoldOut ? "not-allowed" : "pointer"}
-                gap="3"
+                className={flavorCardRecipe({ state: cardState })}
                 key={flavor.key}
                 onClick={() => {
                   if (isSoldOut) {
@@ -286,7 +341,7 @@ export function DangoFlavorDialog({
                   {flavor.key}
                 </p.code>
                 <p.span
-                  color={isSoldOut ? "red.700" : isSelected ? colors.color : "gray.800"}
+                  color={isSoldOut ? "red.700" : isSelected ? "gray.900" : "gray.800"}
                   fontSize="md"
                   fontWeight="bold"
                   textDecoration={isSoldOut ? "line-through" : undefined}

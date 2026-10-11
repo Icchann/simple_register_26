@@ -3,6 +3,7 @@
 import type { Item } from "@/types/item";
 import type { OrderStatus } from "@/types/order";
 import type { Nullable } from "@/types/utils";
+import { cva } from "panda/css";
 import { token } from "panda/tokens";
 import { match } from "ts-pattern";
 import { ItemImpl } from "@/lib/item";
@@ -60,9 +61,58 @@ export const DANGO_FLAVORS = [
 ] as const;
 
 export type DangoFlavorName = typeof DANGO_FLAVORS[number]["name"];
+export const flavorBadgeRecipe = cva({
+  base: {
+    borderRadius: "sm",
+    borderWidth: "1px",
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  variants: {
+    flavor: {
+      味なし: {
+        bg: "gray.100",
+        borderColor: "gray.300",
+        color: "gray.700",
+      },
+      きなこ: {
+        bg: "amber.100",
+        borderColor: "amber.300",
+        color: "amber.900",
+      },
+      みたらし: {
+        bg: "orange.100",
+        borderColor: "orange.300",
+        color: "orange.900",
+      },
+      あんこ: {
+        bg: "purple.100",
+        borderColor: "purple.300",
+        color: "purple.900",
+      },
+      のり醤油: {
+        bg: "emerald.100",
+        borderColor: "emerald.300",
+        color: "emerald.900",
+      },
+      その他: {
+        bg: "gray.100",
+        borderColor: "gray.300",
+        color: "gray.800",
+      },
+    },
+  },
+  defaultVariants: {
+    flavor: "その他",
+  },
+});
 
 export function DangoFlavorImpl(flavor: string) {
+  const validFlavors = ["味なし", "きなこ", "みたらし", "あんこ", "のり醤油"] as const;
+  const matchedFlavor = validFlavors.find((f) => f === flavor) ?? "その他";
+
   return {
+    toClassName: () => flavorBadgeRecipe({ flavor: matchedFlavor }),
     toColor: () => match(flavor)
       .with("味なし", () => ({ bg: "gray.100", borderColor: "gray.300", color: "gray.700" }))
       .with("きなこ", () => ({ bg: "amber.100", borderColor: "amber.300", color: "amber.900" }))

@@ -90,11 +90,26 @@ describe("spreadsheet export functions", () => {
     expect(csv).toContain("\"B,C\"");
   });
 
-  it("builds full sales item detail rows", () => {
-    const rows = buildItemDetailRows([dummyOrder]);
+  it("builds full sales item detail rows with toppings", () => {
+    const orderWithTopping = Order.assert({
+      ...dummyOrder,
+      id: "ord_topping_001",
+      items: [
+        {
+          id: "item_test_001",
+          name: "みたらし",
+          price: 220,
+          amount: 2,
+          flavors: ["みたらし"],
+          toppings: ["増量"],
+        },
+      ],
+    });
+    const rows = buildItemDetailRows([orderWithTopping]);
     expect(rows).toHaveLength(2);
-    expect(rows[0]).toContain("商品グループ");
-    expect(rows[0]).toContain("味・トッピング");
+    expect(rows[1]?.[8]).toBe("みたらし [増量]");
+    expect(rows[1]?.[9]).toBe("220"); // 単価
+    expect(rows[1]?.[11]).toBe("440"); // 小計
   });
 
   it("prevents formula injection while preserving pure numbers", () => {

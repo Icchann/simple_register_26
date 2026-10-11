@@ -203,6 +203,8 @@ export function buildItemDetailRows(orders: readonly Order[]): string[][] {
     for (const item of order.items) {
       const itemGroup = ItemImpl(item).getGroup()?.name ?? "";
       const flavorStr = item.flavors && item.flavors.length > 0 ? item.flavors.join(", ") : "";
+      const toppingStr = item.toppings && item.toppings.length > 0 ? ` [${item.toppings.join(", ")}]` : "";
+      const flavorAndTopping = `${flavorStr}${toppingStr}`.trim();
       const subtotal = item.price * item.amount;
 
       let discountAmount = 0;
@@ -221,7 +223,7 @@ export function buildItemDetailRows(orders: readonly Order[]): string[][] {
         isEffective,
         itemGroup,
         item.name,
-        flavorStr,
+        flavorAndTopping,
         String(item.price),
         String(item.amount),
         String(subtotal),
@@ -291,7 +293,8 @@ export function buildOrderSummaryRows(orders: readonly Order[]): string[][] {
       totalItems += item.amount;
       subtotalAmount += item.price * item.amount;
       const flavorText = item.flavors != null && item.flavors.length > 0 ? `(${item.flavors.join(",")})` : "";
-      summaryParts.push(`${item.name}${flavorText}x${item.amount}`);
+      const toppingText = item.toppings != null && item.toppings.length > 0 ? `[${item.toppings.join(",")}]` : "";
+      summaryParts.push(`${item.name}${flavorText}${toppingText}x${item.amount}`);
 
       if (order.appliedDiscount?.amount != null) {
         const d = order.appliedDiscount.amount[item.id] ?? 0;

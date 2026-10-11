@@ -50,26 +50,31 @@ const OrderQueueRow = memo(({ order, isLastConfirmed, isLastStatusChanged }: { o
                     <p.span color="gray.500" fontSize="[11px]">
                       だんご
                     </p.span>
-                    {item.flavors.map((flavor) => {
-                      const color = DangoFlavorImpl(flavor).toColor();
-                      return (
-                        <p.span
-                          bg={color.bg}
-                          borderColor={color.borderColor}
-                          borderRadius="sm"
-                          borderWidth="1px"
-                          color={color.color}
-                          fontSize="xs"
-                          fontWeight="bold"
-                          key={flavor}
-                          px="1"
-                          py="0.5"
-                          whiteSpace="nowrap"
-                        >
-                          {flavor}
-                        </p.span>
-                      );
-                    })}
+                    {item.flavors.map((flavor) => (
+                      <p.span
+                        className={DangoFlavorImpl(flavor).toClassName()}
+                        fontSize="xs"
+                        key={flavor}
+                        px="1"
+                        py="0.5"
+                      >
+                        {flavor}
+                      </p.span>
+                    ))}
+                    {item.toppings?.includes("増量") === true && (
+                      <p.span
+                        bg="orange.500"
+                        borderRadius="sm"
+                        color="white"
+                        fontSize="[10px]"
+                        fontWeight="bold"
+                        px="1"
+                        py="0.5"
+                        whiteSpace="nowrap"
+                      >
+                        [増量]
+                      </p.span>
+                    )}
                   </HStack>
                 )
               : (

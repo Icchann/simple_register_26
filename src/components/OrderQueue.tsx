@@ -259,26 +259,31 @@ const OrderQueueRow = memo(
                           <p.span color="gray.500" fontSize="[11px]">
                             だんご
                           </p.span>
-                          {item.flavors.map((flavor) => {
-                            const color = DangoFlavorImpl(flavor).toColor();
-                            return (
-                              <p.span
-                                bg={color.bg}
-                                borderColor={color.borderColor}
-                                borderRadius="sm"
-                                borderWidth="1px"
-                                color={color.color}
-                                fontSize={size === "large" ? "2xl" : "sm"}
-                                fontWeight="bold"
-                                key={flavor}
-                                px="1.5"
-                                py="0.5"
-                                whiteSpace="nowrap"
-                              >
-                                {flavor}
-                              </p.span>
-                            );
-                          })}
+                          {item.flavors.map((flavor) => (
+                            <p.span
+                              className={DangoFlavorImpl(flavor).toClassName()}
+                              fontSize={size === "large" ? "2xl" : "sm"}
+                              key={flavor}
+                              px="1.5"
+                              py="0.5"
+                            >
+                              {flavor}
+                            </p.span>
+                          ))}
+                          {item.toppings?.includes("増量") === true && (
+                            <p.span
+                              bg="orange.500"
+                              borderRadius="sm"
+                              color="white"
+                              fontSize={size === "large" ? "xl" : "xs"}
+                              fontWeight="bold"
+                              px="1.5"
+                              py="0.5"
+                              whiteSpace="nowrap"
+                            >
+                              [増量]
+                            </p.span>
+                          )}
                         </HStack>
                       )
                     : (
